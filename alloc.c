@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "log.h"
 #include "private.h"
+#include "trace.h"
 
 /* Plane allocation algorithm
  *
@@ -674,6 +675,10 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 
 	update_layers_priority(device);
 
+	liftoff_tracer_mark(&device->tracer,
+			    "output_apply (begin_ctx=%d)",
+			    device->page_flip_counter);
+
 	ret = reuse_previous_alloc(output, req, flags);
 	if (ret == 0) {
 		log_reuse(output);
@@ -775,6 +780,10 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 	free(result.best);
 
 	mark_layers_clean(output);
+
+	liftoff_tracer_mark(&device->tracer,
+			    "output_apply (end_ctx=%d)",
+			    device->page_flip_counter);
 
 	return 0;
 }
