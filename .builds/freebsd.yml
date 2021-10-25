@@ -4,7 +4,7 @@ packages:
 - graphics/libdrm
 - devel/meson
 sources:
-- https://github.com/emersion/libliftoff
+- https://gitlab.freedesktop.org/emersion/libliftoff.git
 tasks:
 - setup: |
     cd libliftoff

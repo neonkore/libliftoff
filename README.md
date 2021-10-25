@@ -1,6 +1,6 @@
 # libliftoff
 
-[![builds.sr.ht status](https://builds.sr.ht/~emersion/libliftoff.svg)](https://builds.sr.ht/~emersion/libliftoff)
+[![builds.sr.ht status](https://builds.sr.ht/~emersion/libliftoff/commits/master.svg)](https://builds.sr.ht/~emersion/libliftoff/commits/master)
 
 Lightweight KMS plane library.
 
@@ -60,7 +60,7 @@ drmModeAtomicFree(req);
 
 ## Contributing
 
-Report bugs and send pull requests on [GitHub][github].
+Report bugs and send pull requests on [GitLab][gitlab].
 
 We use the Wayland/Weston style and contribution guidelines, see [Weston's
 contributing document][weston-contributing].
@@ -69,10 +69,10 @@ contributing document][weston-contributing].
 
 MIT
 
-[liftoff.h]: https://github.com/emersion/libliftoff/blob/master/include/libliftoff.h
-[example]: https://github.com/emersion/libliftoff/tree/master/example
-[doc/compositor]: https://github.com/emersion/libliftoff/blob/master/doc/compositor.md
+[liftoff.h]: https://gitlab.freedesktop.org/emersion/libliftoff/-/blob/master/include/libliftoff.h
+[example]: https://gitlab.freedesktop.org/emersion/libliftoff/-/tree/master/example
+[doc/compositor]: https://gitlab.freedesktop.org/emersion/libliftoff/-/blob/master/doc/compositor.md
 [intro-post]: https://emersion.fr/blog/2019/xdc2019-wrap-up/#libliftoff
 [fosdem-2020]: https://fosdem.org/2020/schedule/event/kms_planes/
-[github]: https://github.com/emersion/libliftoff
+[gitlab]: https://gitlab.freedesktop.org/emersion/libliftoff
 [weston-contributing]: https://gitlab.freedesktop.org/wayland/weston/-/blob/master/CONTRIBUTING.md

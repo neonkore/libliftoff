@@ -7,7 +7,7 @@ packages:
   - gcovr
   - py3-setuptools # https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/21003
 sources:
-  - https://github.com/emersion/libliftoff
+  - https://gitlab.freedesktop.org/emersion/libliftoff.git
 artifacts:
   - coveragereport.tar.gz
 tasks:
