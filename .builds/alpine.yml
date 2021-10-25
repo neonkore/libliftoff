@@ -5,7 +5,6 @@ packages:
   - meson
   - libdrm-dev
   - gcovr
-  - py3-setuptools # https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/21003
 sources:
   - https://gitlab.freedesktop.org/emersion/libliftoff.git
 artifacts:
