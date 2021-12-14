@@ -124,6 +124,25 @@ static struct test_case tests[] = {
 		},
 	},
 	{
+		.name = "zpos-2x-fail",
+		.layers = {
+			{
+				.width = 100,
+				.height = 100,
+				.zpos = 1,
+				.compat = { CURSOR_PLANE },
+				.result = NULL,
+			},
+			{
+				.width = 1920,
+				.height = 1080,
+				.zpos = 2,
+				.compat = { PRIMARY_PLANE },
+				.result = PRIMARY_PLANE,
+			},
+		},
+	},
+	{
 		.name = "zpos-3x",
 		.layers = {
 			{

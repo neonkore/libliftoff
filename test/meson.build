@@ -30,6 +30,7 @@ tests = {
 		'simple-1x',
 		'simple-1x-fail',
 		'simple-3x',
+		'zpos-2x-fail',
 		'zpos-3x',
 		'zpos-3x-intersect-fail',
 		'zpos-3x-intersect-partial',
