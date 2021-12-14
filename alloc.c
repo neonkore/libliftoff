@@ -89,6 +89,7 @@ struct alloc_step {
 	struct liftoff_layer **alloc; /* only items up to plane_idx are valid */
 	int score; /* number of allocated layers */
 	int last_layer_zpos;
+	int primary_layer_zpos, primary_plane_zpos;
 
 	bool composited; /* per-output */
 
@@ -131,6 +132,13 @@ plane_step_init_next(struct alloc_step *step, struct alloc_step *prev,
 		step->last_layer_zpos = zpos_prop->value;
 	} else {
 		step->last_layer_zpos = prev->last_layer_zpos;
+	}
+	if (zpos_prop != NULL && plane->type == DRM_PLANE_TYPE_PRIMARY) {
+		step->primary_layer_zpos = zpos_prop->value;
+		step->primary_plane_zpos = plane->zpos;
+	} else {
+		step->primary_layer_zpos = prev->primary_layer_zpos;
+		step->primary_plane_zpos = prev->primary_plane_zpos;
 	}
 
 	if (layer != NULL) {
@@ -309,6 +317,21 @@ check_layer_plane_compatible(struct alloc_step *step,
 				    step->log_prefix, (void *)layer, plane->id);
 			return false;
 		}
+		if (plane->type != DRM_PLANE_TYPE_PRIMARY &&
+		    (int)zpos_prop->value < step->primary_layer_zpos &&
+		    plane->zpos > step->primary_plane_zpos) {
+			/* Primary planes are handled up front, because some
+			 * drivers fail all atomic commits when it's missing.
+			 * However that messes up with our zpos checks. In
+			 * particular, we need to make sure we don't put a layer
+			 * configured to be over the primary plane under it.
+			 * TODO: revisit this once we add underlay support. */
+			liftoff_log(LIFTOFF_DEBUG,
+				    "%s Layer %p -> plane %"PRIu32": "
+				    "layer zpos under primary",
+				    step->log_prefix, (void *)layer, plane->id);
+			return false;
+		}
 	}
 
 	if (plane->type != DRM_PLANE_TYPE_PRIMARY &&
@@ -334,7 +357,8 @@ check_layer_plane_compatible(struct alloc_step *step,
 }
 
 static bool
-check_alloc_valid(struct alloc_result *result, struct alloc_step *step)
+check_alloc_valid(struct liftoff_output *output, struct alloc_result *result,
+		  struct alloc_step *step)
 {
 	/* If composition isn't used, we need to have allocated all
 	 * layers. */
@@ -378,7 +402,7 @@ output_choose_layers(struct liftoff_output *output, struct alloc_result *result,
 
 	if (step->plane_link == &device->planes) { /* Allocation finished */
 		if (step->score > result->best_score &&
-		    check_alloc_valid(result, step)) {
+		    check_alloc_valid(output, result, step)) {
 			/* We found a better allocation */
 			liftoff_log(LIFTOFF_DEBUG,
 				    "%sFound a better allocation with score=%d",
@@ -734,6 +758,8 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 	step.plane_idx = 0;
 	step.score = 0;
 	step.last_layer_zpos = INT_MAX;
+	step.primary_layer_zpos = INT_MIN;
+	step.primary_plane_zpos = INT_MAX;
 	step.composited = false;
 	ret = output_choose_layers(output, &result, &step);
 	if (ret != 0) {
