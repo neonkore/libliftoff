@@ -662,7 +662,7 @@ test_needs_composition(const struct test_layer *test_layers)
 static void
 run_test(const struct test_layer *test_layers)
 {
-	size_t i, j;
+	size_t i, j, len;
 	ssize_t plane_index_got, plane_index_want;
 	struct liftoff_mock_plane *mock_planes[64];
 	struct liftoff_mock_plane *mock_plane;
@@ -692,19 +692,24 @@ run_test(const struct test_layer *test_layers)
 	output = liftoff_output_create(device, liftoff_mock_drm_crtc_id);
 	for (i = 0; test_layers[i].width > 0; i++) {
 		test_layer = &test_layers[i];
+
 		layers[i] = add_layer(output, test_layer->x, test_layer->y,
 				      test_layer->width, test_layer->height);
+
 		if (test_layer->zpos != 0) {
 			liftoff_layer_set_property(layers[i], "zpos",
 						   test_layer->zpos);
 		}
+
 		if (test_layer->composition) {
 			liftoff_output_set_composition_layer(output, layers[i]);
 		}
 		if (test_layer->force_composited) {
 			liftoff_layer_set_fb_composited(layers[i]);
 		}
-		for (j = 0; test_layer->compat[j] != NULL; j++) {
+
+		len = sizeof(test_layer->compat) / sizeof(test_layer->compat[0]);
+		for (j = 0; j < len && test_layer->compat[j] != NULL; j++) {
 			mock_plane = mock_planes[test_layer->compat[j] -
 						 test_setup];
 			liftoff_mock_plane_add_compatible_layer(mock_plane,
