@@ -53,6 +53,7 @@ struct test_layer {
 
 struct test_case {
 	const char *name;
+	bool needs_composition;
 	struct test_layer layers[64];
 };
 
@@ -82,9 +83,11 @@ static const size_t test_setup_len = sizeof(test_setup) / sizeof(test_setup[0]);
 static const struct test_case tests[] = {
 	{
 		.name = "empty",
+		.needs_composition = false,
 	},
 	{
 		.name = "simple-1x-fail",
+		.needs_composition = true,
 		.layers = {
 			{
 				.width = 1920,
@@ -96,6 +99,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "simple-1x",
+		.needs_composition = false,
 		.layers = {
 			{
 				.width = 1920,
@@ -107,6 +111,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "simple-3x",
+		.needs_composition = false,
 		.layers = {
 			{
 				.width = 1920,
@@ -130,6 +135,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-2x-fail",
+		.needs_composition = true,
 		.layers = {
 			{
 				.width = 100,
@@ -149,6 +155,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-3x",
+		.needs_composition = false,
 		.layers = {
 			{
 				.width = 1920,
@@ -175,6 +182,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-3x-intersect-fail",
+		.needs_composition = true,
 		/* Layer 1 is over layer 2 but falls back to composition. Since
 		 * they intersect, layer 2 needs to be composited too. */
 		.layers = {
@@ -203,6 +211,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-3x-intersect-partial",
+		.needs_composition = true,
 		/* Layer 1 is only compatible with the cursor plane. Layer 2 is
 		 * only compatible with the overlay plane. Layer 2 is over layer
 		 * 1, but the cursor plane is over the overlay plane. There is a
@@ -234,6 +243,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-3x-disjoint-partial",
+		.needs_composition = true,
 		/* Layer 1 is over layer 2 and falls back to composition. Since
 		 * they don't intersect, layer 2 can be mapped to a plane. */
 		.layers = {
@@ -264,6 +274,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-3x-disjoint",
+		.needs_composition = false,
 		/* Layer 1 is only compatible with the cursor plane. Layer 2 is
 		 * only compatible with the overlay plane. Layer 2 is over layer
 		 * 1, but the cursor plane is over the overlay plane. There is a
@@ -297,6 +308,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-4x-intersect-partial",
+		.needs_composition = true,
 		/* We have 4 layers and 4 planes. However since they all
 		 * intersect and the ordering between both overlay planes is
 		 * undefined, we can only use 3 planes. */
@@ -333,6 +345,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-4x-disjoint",
+		.needs_composition = false,
 		/* Ordering between the two overlay planes isn't defined,
 		 * however layers 2 and 3 don't intersect so they can be mapped
 		 * to these planes nonetheless. */
@@ -371,6 +384,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-4x-disjoint-alt",
+		.needs_composition = false,
 		/* Same as zpos-4x-disjoint, but with the last two layers'
 		 * plane swapped. */
 		.layers = {
@@ -408,6 +422,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-4x-domino-fail",
+		.needs_composition = true,
 		/* A layer on top falls back to composition. There is a layer at
 		 * zpos=2 which doesn't overlap and could be mapped to a plane,
 		 * however another layer at zpos=3 overlaps both and prevents
@@ -449,6 +464,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-4x-domino-partial",
+		.needs_composition = true,
 		/* A layer on top falls back to composition. A layer at zpos=2
 		 * falls back to composition too because it's underneath. A
 		 * layer at zpos=3 doesn't intersect with the one at zpos=4 and
@@ -490,6 +506,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "zpos-2x-reverse",
+		.needs_composition = false,
 		/* Layer on top comes first */
 		.layers = {
 			{
@@ -510,6 +527,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "composition-3x",
+		.needs_composition = true,
 		.layers = {
 			{
 				.width = 1920,
@@ -544,6 +562,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "composition-3x-fail",
+		.needs_composition = true,
 		.layers = {
 			{
 				.width = 1920,
@@ -578,6 +597,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "composition-3x-partial",
+		.needs_composition = true,
 		.layers = {
 			{
 				.width = 1920,
@@ -612,6 +632,7 @@ static const struct test_case tests[] = {
 	},
 	{
 		.name = "composition-3x-force",
+		.needs_composition = true,
 		/* Layers at zpos=1 and zpos=2 could be put on a plane, but
 		 * FB composition is forced on the zpos=2 one. As a result, only
 		 * the layer at zpos=3 can be put into a plane. */
@@ -649,20 +670,6 @@ static const struct test_case tests[] = {
 		},
 	},
 };
-
-static bool
-test_needs_composition(const struct test_layer *test_layers)
-{
-	size_t i;
-
-	for (i = 0; test_layers[i].width > 0; i++) {
-		if (test_layers[i].result == NULL) {
-			return true;
-		}
-	}
-
-	return false;
-}
 
 static void
 run_test(const struct test_case *test)
@@ -764,7 +771,7 @@ run_test(const struct test_case *test)
 	}
 	assert(ok);
 
-	assert(test_needs_composition(test->layers) ==
+	assert(test->needs_composition ==
 	       liftoff_output_needs_composition(output));
 
 	liftoff_output_destroy(output);
