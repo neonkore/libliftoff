@@ -134,6 +134,19 @@ static const struct test_case tests[] = {
 		},
 	},
 	{
+		.name = "zero-fb-id-fail",
+		.needs_composition = false,
+		.layers = {
+			{
+				.width = 1920,
+				.height = 1080,
+				.props = {{ "FB_ID", 0 }},
+				.compat = { PRIMARY_PLANE },
+				.result = NULL,
+			},
+		},
+	},
+	{
 		.name = "zpos-2x-fail",
 		.needs_composition = true,
 		.layers = {
@@ -815,10 +828,10 @@ test_basic(void)
 	close(drm_fd);
 }
 
-/* Checks that the library doesn't allocate a plane for a layer without a
- * non-zero FB_ID set. */
+/* Checks that the library doesn't allocate a plane for a layer without FB_ID
+ * set. */
 static void
-test_no_fb_fail(bool zero_fb_id)
+test_no_props_fail(void)
 {
 	struct liftoff_mock_plane *mock_plane;
 	int drm_fd;
@@ -838,9 +851,6 @@ test_no_fb_fail(bool zero_fb_id)
 
 	output = liftoff_output_create(device, liftoff_mock_drm_crtc_id);
 	layer = liftoff_layer_create(output);
-	if (zero_fb_id) {
-		liftoff_layer_set_property(layer, "FB_ID", 0);
-	}
 
 	liftoff_mock_plane_add_compatible_layer(mock_plane, layer);
 
@@ -920,10 +930,7 @@ main(int argc, char *argv[])
 		test_basic();
 		return 0;
 	} else if (strcmp(test_name, "no-props-fail") == 0) {
-		test_no_fb_fail(false);
-		return 0;
-	} else if (strcmp(test_name, "zero-fb-id-fail") == 0) {
-		test_no_fb_fail(true);
+		test_no_props_fail();
 		return 0;
 	} else if (strcmp(test_name, "composition-zero-fb-id") == 0) {
 		test_composition_zero_fb();
