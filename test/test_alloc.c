@@ -74,7 +74,7 @@ static const size_t test_setup_len = sizeof(test_setup) / sizeof(test_setup[0]);
 #define FIRST_3_SECONDARY_PLANES { &test_setup[1], &test_setup[2], \
 				   &test_setup[3] }
 
-static struct test_case tests[] = {
+static const struct test_case tests[] = {
 	{
 		.name = "empty",
 	},
@@ -646,7 +646,7 @@ static struct test_case tests[] = {
 };
 
 static bool
-test_needs_composition(struct test_layer *test_layers)
+test_needs_composition(const struct test_layer *test_layers)
 {
 	size_t i;
 
@@ -660,13 +660,13 @@ test_needs_composition(struct test_layer *test_layers)
 }
 
 static void
-run_test(struct test_layer *test_layers)
+run_test(const struct test_layer *test_layers)
 {
 	size_t i, j;
 	ssize_t plane_index_got, plane_index_want;
 	struct liftoff_mock_plane *mock_planes[64];
 	struct liftoff_mock_plane *mock_plane;
-	struct test_layer *test_layer;
+	const struct test_layer *test_layer;
 	int drm_fd;
 	struct liftoff_device *device;
 	struct liftoff_output *output;
