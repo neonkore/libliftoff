@@ -665,7 +665,7 @@ test_needs_composition(const struct test_layer *test_layers)
 }
 
 static void
-run_test(const struct test_layer *test_layers)
+run_test(const struct test_case *test)
 {
 	size_t i, j, len;
 	ssize_t plane_index_got, plane_index_want;
@@ -695,8 +695,8 @@ run_test(const struct test_layer *test_layers)
 	liftoff_device_register_all_planes(device);
 
 	output = liftoff_output_create(device, liftoff_mock_drm_crtc_id);
-	for (i = 0; test_layers[i].width > 0; i++) {
-		test_layer = &test_layers[i];
+	for (i = 0; test->layers[i].width > 0; i++) {
+		test_layer = &test->layers[i];
 
 		layers[i] = add_layer(output, test_layer->x, test_layer->y,
 				      test_layer->width, test_layer->height);
@@ -732,7 +732,7 @@ run_test(const struct test_layer *test_layers)
 	drmModeAtomicFree(req);
 
 	ok = true;
-	for (i = 0; test_layers[i].width > 0; i++) {
+	for (i = 0; test->layers[i].width > 0; i++) {
 		plane = liftoff_layer_get_plane(layers[i]);
 		mock_plane = NULL;
 		if (plane != NULL) {
@@ -752,8 +752,8 @@ run_test(const struct test_layer *test_layers)
 			i, (int)plane_index_got);
 
 		plane_index_want = -1;
-		if (test_layers[i].result != NULL) {
-			plane_index_want = test_layers[i].result - test_setup;
+		if (test->layers[i].result != NULL) {
+			plane_index_want = test->layers[i].result - test_setup;
 		}
 
 		if (plane_index_got != plane_index_want) {
@@ -764,7 +764,7 @@ run_test(const struct test_layer *test_layers)
 	}
 	assert(ok);
 
-	assert(test_needs_composition(test_layers) ==
+	assert(test_needs_composition(test->layers) ==
 	       liftoff_output_needs_composition(output));
 
 	liftoff_output_destroy(output);
@@ -925,7 +925,7 @@ main(int argc, char *argv[])
 
 	for (i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
 		if (strcmp(tests[i].name, test_name) == 0) {
-			run_test(tests[i].layers);
+			run_test(&tests[i]);
 			return 0;
 		}
 	}
