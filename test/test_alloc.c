@@ -869,7 +869,7 @@ test_no_props_fail(void)
 /* Checks that the library doesn't fallback to composition when a layer doesn't
  * have a FB. */
 static void
-test_composition_zero_fb(void)
+test_composition_no_props(void)
 {
 	struct liftoff_mock_plane *mock_plane;
 	int drm_fd;
@@ -932,8 +932,8 @@ main(int argc, char *argv[])
 	} else if (strcmp(test_name, "no-props-fail") == 0) {
 		test_no_props_fail();
 		return 0;
-	} else if (strcmp(test_name, "composition-zero-fb-id") == 0) {
-		test_composition_zero_fb();
+	} else if (strcmp(test_name, "composition-no-props") == 0) {
+		test_composition_no_props();
 		return 0;
 	}
 

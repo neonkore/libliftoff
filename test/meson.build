@@ -25,7 +25,7 @@ tests = {
 		'basic',
 		'no-props-fail',
 		'zero-fb-id-fail',
-		'composition-zero-fb-id',
+		'composition-no-props',
 		'empty',
 		'simple-1x',
 		'simple-1x-fail',
