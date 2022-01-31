@@ -569,6 +569,34 @@ static const struct test_case tests[] = {
 		},
 	},
 	{
+		.name = "zpos-3x-zero-alpha",
+		.needs_composition = false,
+		/* Same as zpos-3x-zero-fb-id but with a zero alpha. */
+		.layers = {
+			{
+				.width = 1920,
+				.height = 1080,
+				.props = {{ "zpos", 1 }},
+				.compat = { PRIMARY_PLANE },
+				.result = PRIMARY_PLANE,
+			},
+			{
+				.width = 200,
+				.height = 200,
+				.props = {{ "zpos", 2 }},
+				.compat = { OVERLAY_PLANE },
+				.result = OVERLAY_PLANE,
+			},
+			{
+				.width = 100,
+				.height = 100,
+				.props = {{ "zpos", 3 }, { "alpha", 0 }},
+				.compat = { 0 },
+				.result = NULL,
+			},
+		},
+	},
+	{
 		.name = "composition-3x",
 		.needs_composition = true,
 		.layers = {
