@@ -46,6 +46,7 @@ tests = {
 		'composition-3x-partial',
 		'composition-3x-force',
 		'zpos-2x-reverse',
+		'zpos-3x-zero-fb-id',
 	],
 	'dynamic': [
 		'same',
