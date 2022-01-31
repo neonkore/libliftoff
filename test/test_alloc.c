@@ -31,6 +31,11 @@ struct test_plane {
 	int type;
 };
 
+struct test_prop {
+	const char *name;
+	uint64_t value;
+};
+
 /* This structure describes a layer in a test case. The first block of fields
  * describe the layer properties: geometry, vertical ordering, etc. The `compat`
  * field describes which hardware planes the layer is compatible with. The
@@ -38,9 +43,9 @@ struct test_plane {
  */
 struct test_layer {
 	int x, y, width, height;
-	int zpos; /* zero means unset */
 	bool composition;
 	bool force_composited;
+	struct test_prop props[64];
 
 	struct test_plane *compat[64];
 	struct test_plane *result;
@@ -129,14 +134,14 @@ static const struct test_case tests[] = {
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { CURSOR_PLANE },
 				.result = NULL,
 			},
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
@@ -148,21 +153,21 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = FIRST_2_SECONDARY_PLANES,
 				.result = OVERLAY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = FIRST_2_SECONDARY_PLANES,
 				.result = CURSOR_PLANE,
 			},
@@ -176,21 +181,21 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { NULL },
 				.result = NULL,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = FIRST_2_SECONDARY_PLANES,
 				.result = NULL,
 			},
@@ -207,21 +212,21 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = { CURSOR_PLANE },
 				.result = NULL,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { OVERLAY_PLANE },
 				.result = OVERLAY_PLANE,
 			},
@@ -235,14 +240,14 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { NULL },
 				.result = NULL,
 			},
@@ -251,7 +256,7 @@ static const struct test_case tests[] = {
 				.y = 100,
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = { CURSOR_PLANE },
 				.result = CURSOR_PLANE,
 			},
@@ -268,14 +273,14 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = { CURSOR_PLANE },
 				.result = CURSOR_PLANE,
 			},
@@ -284,7 +289,7 @@ static const struct test_case tests[] = {
 				.y = 100,
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { OVERLAY_PLANE },
 				.result = OVERLAY_PLANE,
 			},
@@ -299,28 +304,28 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 4,
+				.props = {{ "zpos", 4 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = CURSOR_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = NULL,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = &test_setup[3],
 			},
@@ -335,21 +340,21 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 4,
+				.props = {{ "zpos", 4 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = CURSOR_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = { &test_setup[3] },
 				.result = &test_setup[3],
 			},
@@ -358,7 +363,7 @@ static const struct test_case tests[] = {
 				.y = 100,
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { OVERLAY_PLANE },
 				.result = OVERLAY_PLANE,
 			},
@@ -372,21 +377,21 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 4,
+				.props = {{ "zpos", 4 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = CURSOR_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = { OVERLAY_PLANE },
 				.result = OVERLAY_PLANE,
 			},
@@ -395,7 +400,7 @@ static const struct test_case tests[] = {
 				.y = 100,
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { &test_setup[3] },
 				.result = &test_setup[3],
 			},
@@ -411,14 +416,14 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 4,
+				.props = {{ "zpos", 4 }},
 				.compat = { NULL },
 				.result = NULL,
 			},
@@ -427,7 +432,7 @@ static const struct test_case tests[] = {
 				.y = 100,
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = NULL,
 			},
@@ -436,7 +441,7 @@ static const struct test_case tests[] = {
 				.y = 50,
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = NULL,
 			},
@@ -452,14 +457,14 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 4,
+				.props = {{ "zpos", 4 }},
 				.compat = { NULL },
 				.result = NULL,
 			},
@@ -468,7 +473,7 @@ static const struct test_case tests[] = {
 				.y = 100,
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = CURSOR_PLANE,
 			},
@@ -477,7 +482,7 @@ static const struct test_case tests[] = {
 				.y = 50,
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = FIRST_3_SECONDARY_PLANES,
 				.result = NULL,
 			},
@@ -490,14 +495,14 @@ static const struct test_case tests[] = {
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = { PRIMARY_PLANE, OVERLAY_PLANE },
 				.result = OVERLAY_PLANE,
 			},
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE, OVERLAY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
@@ -509,7 +514,7 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.composition = true,
 				.compat = { PRIMARY_PLANE },
 				.result = NULL,
@@ -517,21 +522,21 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = FIRST_2_SECONDARY_PLANES,
 				.result = OVERLAY_PLANE,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = FIRST_2_SECONDARY_PLANES,
 				.result = CURSOR_PLANE,
 			},
@@ -543,7 +548,7 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.composition = true,
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
@@ -551,21 +556,21 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = NULL,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = FIRST_2_SECONDARY_PLANES,
 				.result = NULL,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { 0 },
 				.result = NULL,
 			},
@@ -577,7 +582,7 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.composition = true,
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
@@ -585,21 +590,21 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = NULL,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.compat = { 0 },
 				.result = NULL,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { CURSOR_PLANE },
 				.result = CURSOR_PLANE,
 			},
@@ -614,7 +619,7 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.composition = true,
 				.compat = { PRIMARY_PLANE },
 				.result = PRIMARY_PLANE,
@@ -622,14 +627,14 @@ static const struct test_case tests[] = {
 			{
 				.width = 1920,
 				.height = 1080,
-				.zpos = 1,
+				.props = {{ "zpos", 1 }},
 				.compat = { PRIMARY_PLANE },
 				.result = NULL,
 			},
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 2,
+				.props = {{ "zpos", 2 }},
 				.force_composited = true,
 				.compat = FIRST_2_SECONDARY_PLANES,
 				.result = NULL,
@@ -637,7 +642,7 @@ static const struct test_case tests[] = {
 			{
 				.width = 100,
 				.height = 100,
-				.zpos = 3,
+				.props = {{ "zpos", 3 }},
 				.compat = { CURSOR_PLANE },
 				.result = CURSOR_PLANE,
 			},
@@ -696,9 +701,11 @@ run_test(const struct test_layer *test_layers)
 		layers[i] = add_layer(output, test_layer->x, test_layer->y,
 				      test_layer->width, test_layer->height);
 
-		if (test_layer->zpos != 0) {
-			liftoff_layer_set_property(layers[i], "zpos",
-						   test_layer->zpos);
+		len = sizeof(test_layer->props) / sizeof(test_layer->props[0]);
+		for (j = 0; j < len && test_layer->props[j].name != NULL; j++) {
+			liftoff_layer_set_property(layers[i],
+						   test_layer->props[j].name,
+						   test_layer->props[j].value);
 		}
 
 		if (test_layer->composition) {
