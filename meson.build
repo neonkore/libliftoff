@@ -40,7 +40,7 @@ liftoff_lib = library(
 		'plane.c',
 	),
 	include_directories: liftoff_inc,
-	version: meson.project_version(),
+	version: meson.project_version().split('-')[0],
 	dependencies: liftoff_deps,
 	install: true,
 )
