@@ -8,7 +8,7 @@ sources:
 tasks:
 - setup: |
     cd libliftoff
-    meson build/ -Dauto_features=enabled
+    meson build/ --fatal-meson-warnings
 - build: |
     cd libliftoff
     ninja -C build/

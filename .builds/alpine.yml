@@ -13,8 +13,8 @@ artifacts:
 tasks:
   - setup: |
       cd libliftoff
-      CC=gcc meson build-gcc/ -Db_coverage=true
-      CC=clang meson build-clang/ -Db_sanitize=address,undefined -Db_lundef=false
+      CC=gcc meson build-gcc/ --fatal-meson-warnings -Db_coverage=true
+      CC=clang meson build-clang/ --fatal-meson-warnings -Db_sanitize=address,undefined -Db_lundef=false
   - build-gcc: |
       cd libliftoff
       ninja -C build-gcc/
