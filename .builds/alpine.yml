@@ -33,4 +33,4 @@ tasks:
       echo "exclude-directories = example/" >>gcovr.cfg
       ninja -C build-gcc/ coverage-html
       cd build-gcc/meson-logs/
-      tar -czvf ~/coveragereport.tar.gz coveragereport
+      tar -czf ~/coveragereport.tar.gz coveragereport
