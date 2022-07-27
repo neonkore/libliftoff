@@ -2,6 +2,7 @@ image: alpine/edge
 packages:
   - gcc
   - clang
+  - compiler-rt
   - meson
   - libdrm-dev
   - gcovr
@@ -13,7 +14,7 @@ tasks:
   - setup: |
       cd libliftoff
       CC=gcc meson build-gcc/ -Db_coverage=true
-      CC=clang meson build-clang/
+      CC=clang meson build-clang/ -Db_sanitize=address,undefined -Db_lundef=false
   - build-gcc: |
       cd libliftoff
       ninja -C build-gcc/
