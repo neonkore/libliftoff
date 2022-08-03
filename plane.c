@@ -246,6 +246,10 @@ plane_apply(struct liftoff_plane *plane, struct liftoff_layer *layer,
 			    layer_prop->value == DRM_MODE_ROTATE_0) {
 				continue; /* Layer isn't rotated */
 			}
+			if (strcmp(layer_prop->name, "SCALING_FILTER") == 0 &&
+			    layer_prop->value == 0) {
+				continue; /* Layer uses default scaling filter */
+			}
 			drmModeAtomicSetCursor(req, cursor);
 			return -EINVAL;
 		}
