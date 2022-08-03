@@ -250,6 +250,9 @@ plane_apply(struct liftoff_plane *plane, struct liftoff_layer *layer,
 			    layer_prop->value == 0) {
 				continue; /* Layer uses default scaling filter */
 			}
+			if (strcmp(layer_prop->name, "FB_DAMAGE_CLIPS") == 0) {
+				continue; /* Damage can be omitted */
+			}
 			drmModeAtomicSetCursor(req, cursor);
 			return -EINVAL;
 		}
