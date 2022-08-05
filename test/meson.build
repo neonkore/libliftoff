@@ -76,6 +76,7 @@ tests = {
 		'ignore-alpha',
 		'immutable-zpos',
 		'unmatched',
+		'unset',
 	],
 }
 

@@ -93,6 +93,26 @@ liftoff_layer_set_property(struct liftoff_layer *layer, const char *name,
 }
 
 void
+liftoff_layer_unset_property(struct liftoff_layer *layer, const char *name)
+{
+	struct liftoff_layer_property *prop, *last;
+
+	prop = layer_get_property(layer, name);
+	if (prop == NULL) {
+		return;
+	}
+
+	last = &layer->props[layer->props_len - 1];
+	if (prop != last) {
+		*prop = *last;
+	}
+	memset(last, 0, sizeof(*last));
+	layer->props_len--;
+
+	layer->changed = true;
+}
+
+void
 liftoff_layer_set_fb_composited(struct liftoff_layer *layer)
 {
 	if (layer->force_composition) {
