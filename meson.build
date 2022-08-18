@@ -1,7 +1,7 @@
 project(
 	'libliftoff',
 	'c',
-	version: '0.3.0-dev',
+	version: '0.3.0',
 	license: 'MIT',
 	meson_version: '>=0.52.0',
 	default_options: [
