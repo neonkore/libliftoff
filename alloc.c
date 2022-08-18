@@ -427,7 +427,7 @@ output_choose_layers(struct liftoff_output *output, struct alloc_result *result,
 
 	cursor = drmModeAtomicGetCursor(result->req);
 
-	if (plane->layer != NULL) {
+	if (plane->crtc_id != 0) {
 		goto skip;
 	}
 	if ((plane->possible_crtcs & (1 << output->crtc_index)) == 0) {
@@ -498,14 +498,18 @@ skip:
 }
 
 static int
-apply_current(struct liftoff_device *device, drmModeAtomicReq *req)
+apply_current(struct liftoff_output *output, drmModeAtomicReq *req)
 {
 	struct liftoff_plane *plane;
 	int cursor, ret;
 
 	cursor = drmModeAtomicGetCursor(req);
 
-	liftoff_list_for_each(plane, &device->planes, link) {
+	liftoff_list_for_each(plane, &output->device->planes, link) {
+		if (plane->crtc_id != 0 && plane->crtc_id != output->crtc_id) {
+			continue;
+		}
+
 		ret = plane_apply(plane, plane->layer, req);
 		assert(ret != -EINVAL);
 		if (ret != 0) {
@@ -595,7 +599,7 @@ reuse_previous_alloc(struct liftoff_output *output, drmModeAtomicReq *req,
 
 	cursor = drmModeAtomicGetCursor(req);
 
-	ret = apply_current(device, req);
+	ret = apply_current(output, req);
 	if (ret != 0) {
 		return ret;
 	}
@@ -714,6 +718,10 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 			plane->layer->plane = NULL;
 			plane->layer = NULL;
 		}
+
+		if (plane->crtc_id == output->crtc_id) {
+			plane->crtc_id = 0;
+		}
 	}
 
 	/* Disable all planes we might use. Do it before building mappings to
@@ -721,7 +729,7 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 	 * enabled. */
 	candidate_planes = 0;
 	liftoff_list_for_each(plane, &device->planes, link) {
-		if (plane->layer == NULL) {
+		if (plane->crtc_id == 0) {
 			candidate_planes++;
 			liftoff_log(LIFTOFF_DEBUG,
 				    "Disabling plane %"PRIu32, plane->id);
@@ -786,13 +794,14 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 		assert(plane->layer == NULL);
 		assert(layer->plane == NULL);
 		plane->layer = layer;
+		plane->crtc_id = layer->output->crtc_id;
 		layer->plane = plane;
 	}
 	if (i == 0) {
 		liftoff_log(LIFTOFF_DEBUG, "  (No layer has a plane)");
 	}
 
-	ret = apply_current(device, req);
+	ret = apply_current(output, req);
 	if (ret != 0) {
 		return ret;
 	}

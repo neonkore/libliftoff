@@ -70,6 +70,9 @@ struct liftoff_plane {
 	size_t props_len;
 
 	struct liftoff_layer *layer;
+	/* Used to avoid picking planes currently in-use by other CRTCs on first
+	 * commit */
+	uint32_t crtc_id;
 };
 
 struct liftoff_plane_property {

@@ -66,6 +66,7 @@ liftoff_plane_create(struct liftoff_device *device, uint32_t id)
 	}
 	plane->id = drm_plane->plane_id;
 	plane->possible_crtcs = drm_plane->possible_crtcs;
+	plane->crtc_id = drm_plane->crtc_id;
 	drmModeFreePlane(drm_plane);
 
 	drm_props = drmModeObjectGetProperties(device->drm_fd, id,
