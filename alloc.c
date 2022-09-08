@@ -721,15 +721,19 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 	 * enabled. */
 	candidate_planes = 0;
 	liftoff_list_for_each(plane, &device->planes, link) {
-		if (plane->layer == NULL) {
-			candidate_planes++;
-			liftoff_log(LIFTOFF_DEBUG,
-				    "Disabling plane %"PRIu32, plane->id);
-			ret = plane_apply(plane, NULL, req);
-			assert(ret != -EINVAL);
-			if (ret != 0) {
-				return ret;
-			}
+		if (plane->layer != NULL) {
+			continue;
+		}
+		if ((plane->possible_crtcs & (1 << output->crtc_index)) == 0) {
+			continue;
+		}
+
+		candidate_planes++;
+		liftoff_log(LIFTOFF_DEBUG, "Disabling plane %"PRIu32, plane->id);
+		ret = plane_apply(plane, NULL, req);
+		assert(ret != -EINVAL);
+		if (ret != 0) {
+			return ret;
 		}
 	}
 
