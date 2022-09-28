@@ -63,12 +63,12 @@ uint32_t
 liftoff_plane_get_id(struct liftoff_plane *plane);
 
 /**
- * Build a layer to plane mapping and append the plane configuration to `req`.
+ * Build a layer to plane mapping and append the plane configuration to req.
  *
- * Callers are expected to commit `req` afterwards and can figure out which
- * layers need composition via `liftoff_layer_needs_composition`.
+ * Callers are expected to commit req afterwards and can figure out which
+ * layers need composition via liftoff_layer_needs_composition().
  *
- * `flags` is the atomic commit flags the caller intends to use.
+ * flags is the atomic commit flags the caller intends to use.
  *
  * Zero is returned on success, negative errno on error.
  */
@@ -108,7 +108,7 @@ liftoff_output_set_composition_layer(struct liftoff_output *output,
  *
  * An output doesn't need composition if all visible layers could be mapped to a
  * plane. In other words, if an output needs composition, at least one layer
- * will return true when `liftoff_layer_needs_composition` is called.
+ * will return true when liftoff_layer_needs_composition() is called.
  */
 bool
 liftoff_output_needs_composition(struct liftoff_output *output);
