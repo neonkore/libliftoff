@@ -13,6 +13,9 @@ Resources:
 * [Blog post introducing the project][intro-post]
 * [FOSDEM 2020 talk][fosdem-2020]
 
+libliftoff is used in production by [gamescope] on Steam Deck devices, and work
+is underway to integrate it with [wlroots].
+
 ## Building
 
 Depends on libdrm. Requires universal planes and atomic.
@@ -76,3 +79,5 @@ MIT
 [fosdem-2020]: https://fosdem.org/2020/schedule/event/kms_planes/
 [gitlab]: https://gitlab.freedesktop.org/emersion/libliftoff
 [weston-contributing]: https://gitlab.freedesktop.org/wayland/weston/-/blob/master/CONTRIBUTING.md
+[gamescope]: https://github.com/Plagman/gamescope
+[wlroots]: https://gitlab.freedesktop.org/wlroots/wlroots
