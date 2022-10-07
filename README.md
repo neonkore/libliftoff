@@ -6,7 +6,7 @@ Lightweight KMS plane library.
 
 libliftoff eases the use of KMS planes from userspace without standing in your
 way. Users create "virtual planes" called layers, set KMS properties on them,
-and libliftoff will pick planes for these layers if possible.
+and libliftoff will pick hardware planes for these layers if possible.
 
 Resources:
 
