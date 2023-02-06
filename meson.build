@@ -51,6 +51,10 @@ liftoff = declare_dependency(
 	dependencies: liftoff_deps,
 )
 
+if meson.version().version_compare('>= 0.54.0')
+	meson.override_dependency('libliftoff', liftoff)
+endif
+
 install_headers('include/libliftoff.h')
 
 pkgconfig = import('pkgconfig')
