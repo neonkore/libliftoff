@@ -18,6 +18,8 @@ struct liftoff_device {
 	uint32_t *crtcs;
 	size_t crtcs_len;
 
+	size_t planes_cap; /* max number of planes */
+
 	int page_flip_counter;
 	int test_commit_counter;
 };
@@ -47,6 +49,9 @@ struct liftoff_layer {
 	bool force_composition; /* FB needs to be composited */
 
 	struct liftoff_plane *plane;
+
+	/* Array of plane IDs with a length of liftoff_device.planes_cap */
+	uint32_t *candidate_planes;
 
 	int current_priority, pending_priority;
 	/* prop added or force_composition changed */
@@ -104,6 +109,13 @@ layer_update_priority(struct liftoff_layer *layer, bool make_current);
 
 bool
 layer_has_fb(struct liftoff_layer *layer);
+
+void
+layer_add_candidate_plane(struct liftoff_layer *layer,
+			  struct liftoff_plane *plane);
+
+void
+layer_reset_candidate_planes(struct liftoff_layer *layer);
 
 bool
 layer_is_visible(struct liftoff_layer *layer);

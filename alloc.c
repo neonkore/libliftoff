@@ -439,7 +439,7 @@ output_choose_layers(struct liftoff_output *output, struct alloc_result *result,
 		    step->log_prefix, plane->id, step->plane_idx + 1, result->planes_len);
 
 	liftoff_list_for_each(layer, &output->layers, link) {
-		if (layer->plane != NULL || layer->force_composition) {
+		if (layer->plane != NULL) {
 			continue;
 		}
 		if (!layer_is_visible(layer)) {
@@ -459,6 +459,18 @@ output_choose_layers(struct liftoff_output *output, struct alloc_result *result,
 			continue;
 		} else if (ret != 0) {
 			return ret;
+		}
+
+		layer_add_candidate_plane(layer, plane);
+
+		/* If composition is forced, wait until after the
+		 * layer_add_candidate_plane() call to reject the plane: we want
+		 * to return a meaningful list of candidate planes so that the
+		 * API user has the opportunity to re-allocate its buffers with
+		 * scanout-capable ones. */
+		if (layer->force_composition) {
+			drmModeAtomicSetCursor(result->req, cursor);
+			continue;
 		}
 
 		ret = device_test_commit(device, result->req, result->flags);
@@ -742,6 +754,11 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 		return 0;
 	}
 	log_no_reuse(output);
+
+	/* Reset layers' candidate planes */
+	liftoff_list_for_each(layer, &output->layers, link) {
+		layer_reset_candidate_planes(layer);
+	}
 
 	device->test_commit_counter = 0;
 	output_log_layers(output);

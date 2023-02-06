@@ -179,6 +179,21 @@ liftoff_layer_needs_composition(struct liftoff_layer *layer);
 struct liftoff_plane *
 liftoff_layer_get_plane(struct liftoff_layer *layer);
 
+/**
+ * Check whether a plane is a candidate for this layer.
+ *
+ * A plane is a candidate if it could potentially be used for the layer with
+ * a buffer with the same size. The buffer may need to be re-allocated with
+ * formats and modifiers accepted by the plane.
+ *
+ * This can be used to implemented a feedback loop: if a layer isn't mapped to
+ * a plane, loop over the candidate planes, and re-allocate the layer's FB
+ * according to the IN_FORMATS property.
+ */
+bool
+liftoff_layer_is_candidate_plane(struct liftoff_layer *layer,
+				 struct liftoff_plane *plane);
+
 enum liftoff_log_priority {
 	LIFTOFF_SILENT,
 	LIFTOFF_ERROR,

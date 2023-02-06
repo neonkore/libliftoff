@@ -1,7 +1,9 @@
+#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <xf86drm.h>
+#include <sys/types.h>
 #include "private.h"
 
 struct liftoff_layer *
@@ -15,6 +17,13 @@ liftoff_layer_create(struct liftoff_output *output)
 		return NULL;
 	}
 	layer->output = output;
+	layer->candidate_planes = calloc(sizeof(layer->candidate_planes[0]),
+					 output->device->planes_cap);
+	if (layer->candidate_planes == NULL) {
+		liftoff_log_errno(LIFTOFF_ERROR, "calloc");
+		free(layer);
+		return NULL;
+	}
 	liftoff_list_insert(output->layers.prev, &layer->link);
 	output->layers_changed = true;
 	return layer;
@@ -35,6 +44,7 @@ liftoff_layer_destroy(struct liftoff_layer *layer)
 		layer->output->composition_layer = NULL;
 	}
 	free(layer->props);
+	free(layer->candidate_planes);
 	liftoff_list_remove(&layer->link);
 	free(layer);
 }
@@ -295,4 +305,46 @@ layer_cache_fb_info(struct liftoff_layer *layer)
 	layer->fb_info = *fb_info;
 	drmModeFreeFB2(fb_info);
 	return 0;
+}
+
+bool
+liftoff_layer_is_candidate_plane(struct liftoff_layer *layer,
+				 struct liftoff_plane *plane)
+{
+	size_t i;
+
+	for (i = 0; i < layer->output->device->planes_cap; i++) {
+		if (layer->candidate_planes[i] == plane->id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void
+layer_add_candidate_plane(struct liftoff_layer *layer,
+			  struct liftoff_plane *plane)
+{
+	size_t i;
+	ssize_t empty_slot = -1;
+
+	for (i = 0; i < layer->output->device->planes_cap; i++) {
+		if (layer->candidate_planes[i] == plane->id) {
+			return;
+		}
+		if (empty_slot < 0 && layer->candidate_planes[i] == 0) {
+			empty_slot = i;
+		}
+	}
+
+	assert(empty_slot >= 0);
+	layer->candidate_planes[empty_slot] = plane->id;
+}
+
+void
+layer_reset_candidate_planes(struct liftoff_layer *layer)
+{
+	memset(layer->candidate_planes, 0,
+	       sizeof(layer->candidate_planes[0]) * layer->output->device->planes_cap);
 }

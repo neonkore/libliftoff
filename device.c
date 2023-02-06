@@ -10,6 +10,7 @@ liftoff_device_create(int drm_fd)
 {
 	struct liftoff_device *device;
 	drmModeRes *drm_res;
+	drmModePlaneRes *drm_plane_res;
 
 	device = calloc(1, sizeof(*device));
 	if (device == NULL) {
@@ -46,6 +47,15 @@ liftoff_device_create(int drm_fd)
 	       drm_res->count_crtcs * sizeof(uint32_t));
 
 	drmModeFreeResources(drm_res);
+
+	drm_plane_res = drmModeGetPlaneResources(device->drm_fd);
+	if (drm_plane_res == NULL) {
+		liftoff_log_errno(LIFTOFF_ERROR, "drmModeGetPlaneResources");
+		liftoff_device_destroy(device);
+		return NULL;
+	}
+	device->planes_cap = drm_plane_res->count_planes;
+	drmModeFreePlaneResources(drm_plane_res);
 
 	return device;
 }
