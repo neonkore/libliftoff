@@ -518,6 +518,18 @@ apply_current(struct liftoff_device *device, drmModeAtomicReq *req)
 }
 
 static bool
+fb_info_needs_realloc(const drmModeFB2 *a, const drmModeFB2 *b)
+{
+	if (a->width != b->width || a->height != b->height ||
+	    a->pixel_format != b->pixel_format || a->modifier != b->modifier)
+		return true;
+
+	/* TODO: consider checking pitch and offset? */
+
+	return false;
+}
+
+static bool
 layer_needs_realloc(struct liftoff_layer *layer)
 {
 	size_t i;
@@ -529,21 +541,30 @@ layer_needs_realloc(struct liftoff_layer *layer)
 
 	for (i = 0; i < layer->props_len; i++) {
 		prop = &layer->props[i];
-		if (prop->value == prop->prev_value) {
-			continue;
-		}
 
 		/* If FB_ID changes from non-zero to zero, we don't need to
 		 * display this layer anymore, so we may be able to re-use its
 		 * plane for another layer. If FB_ID changes from zero to
 		 * non-zero, we might be able to find a plane for this layer.
-		 * If FB_ID changes from non-zero to non-zero, we can try to
-		 * re-use the previous allocation. */
+		 * If FB_ID changes from non-zero to non-zero and the FB
+		 * attributes didn't change, we can try to re-use the previous
+		 * allocation. */
 		if (strcmp(prop->name, "FB_ID") == 0) {
 			if (prop->value == 0 || prop->prev_value == 0) {
 				return true;
 			}
-			/* TODO: check format/modifier is the same? */
+
+			if (fb_info_needs_realloc(&layer->fb_info,
+						  &layer->prev_fb_info)) {
+				return true;
+			}
+
+			continue;
+		}
+
+		/* For all properties except FB_ID, we can skip realloc if the
+		 * value didn't change. */
+		if (prop->value == prop->prev_value) {
 			continue;
 		}
 
@@ -640,6 +661,22 @@ update_layers_priority(struct liftoff_device *device)
 }
 
 static void
+update_layers_fb_info(struct liftoff_output *output)
+{
+	struct liftoff_layer *layer;
+
+	/* We don't know what the library user did in-between
+	 * liftoff_output_apply() calls. They might've removed the FB and
+	 * re-created a completely different one which happens to have the same
+	 * FB ID. */
+	liftoff_list_for_each(layer, &output->layers, link) {
+		memset(&layer->fb_info, 0, sizeof(layer->fb_info));
+		layer_cache_fb_info(layer);
+		/* TODO: propagate error? */
+	}
+}
+
+static void
 log_reuse(struct liftoff_output *output)
 {
 	if (output->alloc_reused_counter == 0) {
@@ -697,6 +734,7 @@ liftoff_output_apply(struct liftoff_output *output, drmModeAtomicReq *req,
 	device = output->device;
 
 	update_layers_priority(device);
+	update_layers_fb_info(output);
 
 	ret = reuse_previous_alloc(output, req, flags);
 	if (ret == 0) {

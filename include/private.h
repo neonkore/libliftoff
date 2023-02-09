@@ -51,6 +51,7 @@ struct liftoff_layer {
 	int current_priority, pending_priority;
 	/* prop added or force_composition changed */
 	bool changed;
+	drmModeFB2 fb_info, prev_fb_info; /* cached FB info */
 };
 
 struct liftoff_layer_property {
@@ -106,6 +107,9 @@ layer_has_fb(struct liftoff_layer *layer);
 
 bool
 layer_is_visible(struct liftoff_layer *layer);
+
+int
+layer_cache_fb_info(struct liftoff_layer *layer);
 
 int
 plane_apply(struct liftoff_plane *plane, struct liftoff_layer *layer,
