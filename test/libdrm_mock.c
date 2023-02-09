@@ -207,6 +207,12 @@ liftoff_mock_plane_add_compatible_layer(struct liftoff_mock_plane *plane,
 }
 
 uint32_t
+liftoff_mock_plane_get_id(struct liftoff_mock_plane *plane)
+{
+	return plane->id;
+}
+
+uint32_t
 liftoff_mock_drm_create_fb(struct liftoff_layer *layer)
 {
 	size_t i;

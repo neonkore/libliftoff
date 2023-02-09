@@ -37,6 +37,8 @@ liftoff_mock_plane_add_compatible_layer(struct liftoff_mock_plane *plane,
 					struct liftoff_layer *layer);
 struct liftoff_layer *
 liftoff_mock_plane_get_layer(struct liftoff_mock_plane *plane);
+uint32_t
+liftoff_mock_plane_get_id(struct liftoff_mock_plane *plane);
 
 uint32_t
 liftoff_mock_plane_add_property(struct liftoff_mock_plane *plane,
