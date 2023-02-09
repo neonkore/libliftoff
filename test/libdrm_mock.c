@@ -33,6 +33,11 @@ struct liftoff_mock_prop {
 	uint64_t value;
 };
 
+struct liftoff_mock_fb {
+	struct liftoff_layer *layer;
+	drmModeFB2 info;
+};
+
 struct _drmModeAtomicReq {
 	struct liftoff_mock_prop props[MAX_REQ_PROPS];
 	int cursor;
@@ -40,7 +45,7 @@ struct _drmModeAtomicReq {
 
 static int mock_pipe[2] = {-1, -1};
 static struct liftoff_mock_plane mock_planes[MAX_PLANES];
-static struct liftoff_layer *mock_fbs[MAX_LAYERS];
+static struct liftoff_mock_fb mock_fbs[MAX_LAYERS];
 
 enum plane_prop {
 	PLANE_TYPE,
@@ -205,15 +210,29 @@ uint32_t
 liftoff_mock_drm_create_fb(struct liftoff_layer *layer)
 {
 	size_t i;
+	uint32_t fb_id;
 
 	i = 0;
-	while (mock_fbs[i] != 0) {
+	while (mock_fbs[i].layer != NULL) {
 		i++;
 	}
 
-	mock_fbs[i] = layer;
+	fb_id = object_id(i, DRM_MODE_OBJECT_FB);
 
-	return object_id(i, DRM_MODE_OBJECT_FB);
+	mock_fbs[i] = (struct liftoff_mock_fb) {
+		.layer = layer,
+	};
+
+	return fb_id;
+}
+
+void
+liftoff_mock_drm_set_fb_info(const drmModeFB2 *fb_info)
+{
+	size_t i;
+
+	i = object_index(fb_info->fb_id, DRM_MODE_OBJECT_FB);
+	mock_fbs[i].info = *fb_info;
 }
 
 static bool
@@ -247,7 +266,7 @@ mock_fb_get_layer(uint32_t fb_id)
 	i = object_index(fb_id, DRM_MODE_OBJECT_FB);
 	assert(i < MAX_LAYERS);
 
-	return mock_fbs[i];
+	return mock_fbs[i].layer;
 }
 
 struct liftoff_layer *
@@ -541,4 +560,32 @@ void
 drmModeAtomicSetCursor(drmModeAtomicReq *req, int cursor)
 {
 	req->cursor = cursor;
+}
+
+drmModeFB2 *
+drmModeGetFB2(int fd, uint32_t fb_id)
+{
+	size_t i;
+	drmModeFB2 *fb2;
+
+	i = object_index(fb_id, DRM_MODE_OBJECT_FB);
+	assert(i < MAX_LAYERS);
+
+	if (mock_fbs[i].info.fb_id == 0) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	fb2 = malloc(sizeof(*fb2));
+	if (fb2 == NULL) {
+		return NULL;
+	}
+	*fb2 = mock_fbs[i].info;
+	return fb2;
+}
+
+void
+drmModeFreeFB2(drmModeFB2 *fb2)
+{
+	free(fb2);
 }

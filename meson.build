@@ -24,7 +24,7 @@ add_project_arguments(cc.get_supported_arguments([
 
 liftoff_inc = include_directories('include')
 
-drm = dependency('libdrm', include_type: 'system')
+drm = dependency('libdrm', include_type: 'system', version: '>= 2.4.101')
 
 liftoff_deps = [drm]
 

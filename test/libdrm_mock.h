@@ -22,6 +22,9 @@ liftoff_mock_drm_open(void);
 uint32_t
 liftoff_mock_drm_create_fb(struct liftoff_layer *layer);
 
+void
+liftoff_mock_drm_set_fb_info(const drmModeFB2 *fb_info);
+
 struct liftoff_mock_plane *
 liftoff_mock_drm_create_plane(int type);
 
