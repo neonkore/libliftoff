@@ -79,6 +79,9 @@ tests = {
 		'unmatched',
 		'unset',
 	],
+	'candidate': [
+		'basic',
+	],
 }
 
 foreach test_name, subtests : tests
