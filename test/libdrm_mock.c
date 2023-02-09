@@ -601,3 +601,16 @@ drmCloseBufferHandle(int fd, uint32_t handle)
 	errno = EINVAL;
 	return -EINVAL;
 }
+
+drmModePropertyBlobRes *
+drmModeGetPropertyBlob(int fd, uint32_t blob_id)
+{
+	errno = EINVAL; /* TODO */
+	return NULL;
+}
+
+void
+drmModeFreePropertyBlob(drmModePropertyBlobRes *blob)
+{
+	free(blob);
+}
