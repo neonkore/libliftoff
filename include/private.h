@@ -74,6 +74,7 @@ struct liftoff_plane {
 
 	struct liftoff_plane_property *props;
 	size_t props_len;
+	drmModePropertyBlobRes *in_formats_blob;
 
 	struct liftoff_layer *layer;
 };
@@ -126,6 +127,9 @@ layer_cache_fb_info(struct liftoff_layer *layer);
 int
 plane_apply(struct liftoff_plane *plane, struct liftoff_layer *layer,
 	    drmModeAtomicReq *req);
+
+bool
+plane_check_layer_fb(struct liftoff_plane *plane, struct liftoff_layer *layer);
 
 void
 output_log_layers(struct liftoff_output *output);

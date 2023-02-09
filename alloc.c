@@ -467,8 +467,8 @@ output_choose_layers(struct liftoff_output *output, struct alloc_result *result,
 		 * layer_add_candidate_plane() call to reject the plane: we want
 		 * to return a meaningful list of candidate planes so that the
 		 * API user has the opportunity to re-allocate its buffers with
-		 * scanout-capable ones. */
-		if (layer->force_composition) {
+		 * scanout-capable ones. Same deal for the FB check. */
+		if (layer->force_composition || !plane_check_layer_fb(plane, layer)) {
 			drmModeAtomicSetCursor(result->req, cursor);
 			continue;
 		}

@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include "private.h"
 
 static int
@@ -102,6 +103,13 @@ liftoff_plane_create(struct liftoff_device *device, uint32_t id)
 		} else if (strcmp(prop->name, "zpos") == 0) {
 			plane->zpos = value;
 			has_zpos = true;
+		} else if (strcmp(prop->name, "IN_FORMATS") == 0) {
+			plane->in_formats_blob = drmModeGetPropertyBlob(device->drm_fd,
+									value);
+			if (plane->in_formats_blob == NULL) {
+				liftoff_log_errno(LIFTOFF_ERROR, "drmModeGetPropertyBlob");
+				return NULL;
+			}
 		}
 	}
 	drmModeFreeObjectProperties(drm_props);
@@ -149,6 +157,7 @@ liftoff_plane_destroy(struct liftoff_plane *plane)
 	}
 	liftoff_list_remove(&plane->link);
 	free(plane->props);
+	drmModeFreePropertyBlob(plane->in_formats_blob);
 	free(plane);
 }
 
@@ -202,6 +211,57 @@ set_plane_prop_str(struct liftoff_plane *plane, drmModeAtomicReq *req,
 	}
 
 	return plane_set_prop(plane, req, prop, value);
+}
+
+bool
+plane_check_layer_fb(struct liftoff_plane *plane, struct liftoff_layer *layer)
+{
+	const struct drm_format_modifier_blob *set;
+	const uint32_t *formats;
+	const struct drm_format_modifier *modifiers;
+	size_t i;
+	ssize_t format_index, modifier_index;
+	int format_shift;
+
+	/* TODO: add support for legacy format list with implicit modifier */
+	if (layer->fb_info.fb_id == 0 ||
+	    !(layer->fb_info.flags & DRM_MODE_FB_MODIFIERS) ||
+	    plane->in_formats_blob == NULL) {
+		return true; /* not enough information to reject */
+	}
+
+	set = plane->in_formats_blob->data;
+
+	formats = (void *)((char *)set + set->formats_offset);
+	format_index = -1;
+	for (i = 0; i < set->count_formats; ++i) {
+		if (formats[i] == layer->fb_info.pixel_format) {
+			format_index = i;
+			break;
+		}
+	}
+	if (format_index < 0) {
+		return false;
+	}
+
+	modifiers = (void *)((char *)set + set->modifiers_offset);
+	modifier_index = -1;
+	for (i = 0; i < set->count_modifiers; i++) {
+		if (modifiers[i].modifier == layer->fb_info.modifier) {
+			modifier_index = i;
+			break;
+		}
+	}
+	if (modifier_index < 0) {
+		return false;
+	}
+
+	if (format_index < modifiers[modifier_index].offset ||
+	    format_index >= modifiers[modifier_index].offset + 64) {
+		return false;
+	}
+	format_shift = (int)(format_index - modifiers[modifier_index].offset);
+	return (modifiers[modifier_index].formats & ((uint64_t)1 << format_shift)) != 0;
 }
 
 int
