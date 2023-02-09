@@ -54,6 +54,7 @@ tests = {
 	'dynamic': [
 		'same',
 		'change-fb',
+		'change-fb-modifier',
 		'unset-fb',
 		'set-fb',
 		'add-layer',
