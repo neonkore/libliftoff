@@ -46,6 +46,7 @@ struct _drmModeAtomicReq {
 static int mock_pipe[2] = {-1, -1};
 static struct liftoff_mock_plane mock_planes[MAX_PLANES];
 static struct liftoff_mock_fb mock_fbs[MAX_LAYERS];
+static drmModePropertyBlobRes mock_blobs[MAX_PLANES];
 
 enum plane_prop {
 	PLANE_TYPE,
@@ -303,6 +304,46 @@ liftoff_mock_plane_add_property(struct liftoff_mock_plane *plane,
 	plane->enabled_props[get_prop_index(prop_id)] = true;
 	plane->prop_values[get_prop_index(prop_id)] = value;
 	return prop_id;
+}
+
+static uint32_t
+register_blob(size_t size, const void *data)
+{
+	size_t i;
+	uint32_t blob_id;
+	void *copy;
+
+	i = 0;
+	while (mock_blobs[i].id != 0) {
+		i++;
+		assert(i < sizeof(mock_blobs) / sizeof(mock_blobs[0]));
+	}
+
+	copy = malloc(size);
+	memcpy(copy, data, size);
+
+	blob_id = object_id(i, DRM_MODE_OBJECT_BLOB);
+	mock_blobs[i] = (drmModePropertyBlobRes) {
+		.id = blob_id,
+		.length = size,
+		.data = copy,
+	};
+	return blob_id;
+}
+
+void
+liftoff_mock_plane_add_in_formats(struct liftoff_mock_plane *plane,
+				  const struct drm_format_modifier_blob *data,
+				  size_t size)
+{
+	uint32_t blob_id;
+	drmModePropertyRes prop = {0};
+
+	blob_id = register_blob(size, data);
+
+	strncpy(prop.name, "IN_FORMATS", sizeof(prop.name) - 1);
+	/* TODO: fill flags */
+	liftoff_mock_plane_add_property(plane, &prop, blob_id);
 }
 
 static void
@@ -605,12 +646,44 @@ drmCloseBufferHandle(int fd, uint32_t handle)
 drmModePropertyBlobRes *
 drmModeGetPropertyBlob(int fd, uint32_t blob_id)
 {
-	errno = EINVAL; /* TODO */
-	return NULL;
+	size_t i;
+	drmModePropertyBlobRes *blob;
+	void *data;
+
+	i = object_index(blob_id, DRM_MODE_OBJECT_BLOB);
+	assert(i < sizeof(mock_blobs) / sizeof(mock_blobs[0]));
+
+	if (mock_blobs[i].id == 0) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	blob = malloc(sizeof(*blob));
+	if (blob == NULL) {
+		return NULL;
+	}
+
+	data = malloc(mock_blobs[i].length);
+	if (data == NULL) {
+		free(blob);
+		return NULL;
+	}
+	memcpy(data, mock_blobs[i].data, mock_blobs[i].length);
+
+	*blob = (drmModePropertyBlobRes) {
+		.id = blob_id,
+		.length = mock_blobs[i].length,
+		.data = data,
+	};
+	return blob;
 }
 
 void
 drmModeFreePropertyBlob(drmModePropertyBlobRes *blob)
 {
+	if (blob == NULL) {
+		return;
+	}
+	free(blob->data);
 	free(blob);
 }

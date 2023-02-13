@@ -44,5 +44,9 @@ uint32_t
 liftoff_mock_plane_add_property(struct liftoff_mock_plane *plane,
 				const drmModePropertyRes *prop,
 				uint64_t value);
+void
+liftoff_mock_plane_add_in_formats(struct liftoff_mock_plane *plane,
+				  const struct drm_format_modifier_blob *data,
+				  size_t size);
 
 #endif
