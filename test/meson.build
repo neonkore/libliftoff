@@ -78,6 +78,7 @@ tests = {
 		'immutable-zpos',
 		'unmatched',
 		'unset',
+		'in-formats',
 	],
 	'candidate': [
 		'basic',

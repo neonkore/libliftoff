@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <drm_fourcc.h>
 #include <unistd.h>
 #include <libliftoff.h>
 #include <stdio.h>
@@ -327,6 +328,99 @@ test_unset_prop(void)
 	return 0;
 }
 
+struct single_format_modifier_blob {
+	struct drm_format_modifier_blob base;
+	uint32_t formats[1];
+	struct drm_format_modifier modifiers[1];
+};
+
+static int
+test_in_formats(void)
+{
+	struct liftoff_mock_plane *mock_plane;
+	int drm_fd;
+	struct liftoff_device *device;
+	struct liftoff_output *output;
+	struct liftoff_layer *layer;
+	drmModeAtomicReq *req;
+	int ret;
+	struct single_format_modifier_blob in_formats;
+	uint32_t fb_id;
+	drmModeFB2 fb_info;
+
+	/* Create an IN_FORMATS property which only supports
+	 * DRM_FORMAT_ARGB8888 + DRM_FORMAT_MOD_LINEAR */
+	in_formats = (struct single_format_modifier_blob) {
+		.base = {
+			.version = 1,
+			.count_formats = 1,
+			.formats_offset = offsetof(struct single_format_modifier_blob, formats),
+			.count_modifiers = 1,
+			.modifiers_offset = offsetof(struct single_format_modifier_blob, modifiers),
+		},
+		.formats = { DRM_FORMAT_ARGB8888 },
+		.modifiers = {
+			{ .formats = 0x01, .modifier = DRM_FORMAT_MOD_LINEAR },
+		},
+	};
+
+	mock_plane = liftoff_mock_drm_create_plane(DRM_PLANE_TYPE_PRIMARY);
+	liftoff_mock_plane_add_in_formats(mock_plane, &in_formats.base, sizeof(in_formats));
+
+	drm_fd = liftoff_mock_drm_open();
+	device = liftoff_device_create(drm_fd);
+	assert(device != NULL);
+
+	liftoff_device_register_all_planes(device);
+
+	output = liftoff_output_create(device, liftoff_mock_drm_crtc_id);
+	layer = add_layer(output, 0, 0, 1920, 1080);
+	fb_id = liftoff_mock_drm_create_fb(layer);
+	fb_info = (drmModeFB2) {
+		.fb_id = fb_id,
+		.width = 1920,
+		.height = 1080,
+		.flags = DRM_MODE_FB_MODIFIERS,
+		.pixel_format = DRM_FORMAT_ARGB8888,
+		.modifier = I915_FORMAT_MOD_X_TILED,
+	};
+	liftoff_mock_drm_set_fb_info(&fb_info);
+	liftoff_layer_set_property(layer, "FB_ID", fb_id);
+
+	liftoff_mock_plane_add_compatible_layer(mock_plane, layer);
+
+	/* First commit: even if the layer is compatible with the plane,
+	 * libliftoff shouldn't try to use the plane because the FB modifier
+	 * isn't in IN_FORMATS */
+	req = drmModeAtomicAlloc();
+	ret = liftoff_output_apply(output, req, 0);
+	assert(ret == 0);
+	ret = drmModeAtomicCommit(drm_fd, req, 0, NULL);
+	assert(ret == 0);
+	assert(liftoff_mock_plane_get_layer(mock_plane) == NULL);
+	drmModeAtomicFree(req);
+
+	fb_id = liftoff_mock_drm_create_fb(layer);
+	fb_info.fb_id = fb_id;
+	fb_info.modifier = DRM_FORMAT_MOD_LINEAR;
+	liftoff_mock_drm_set_fb_info(&fb_info);
+	liftoff_layer_set_property(layer, "FB_ID", fb_id);
+
+	/* Second commit: the new FB modifier is in IN_FORMATS */
+	req = drmModeAtomicAlloc();
+	ret = liftoff_output_apply(output, req, 0);
+	assert(ret == 0);
+	ret = drmModeAtomicCommit(drm_fd, req, 0, NULL);
+	assert(ret == 0);
+	assert(liftoff_mock_plane_get_layer(mock_plane) == layer);
+	drmModeAtomicFree(req);
+
+	liftoff_device_destroy(device);
+	close(drm_fd);
+
+	return 0;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -352,6 +446,8 @@ main(int argc, char *argv[])
 		return test_unmatched_prop();
 	} else if (strcmp(test_name, "unset") == 0) {
 		return test_unset_prop();
+	} else if (strcmp(test_name, "in-formats") == 0) {
+		return test_in_formats();
 	} else {
 		fprintf(stderr, "no such test: %s\n", test_name);
 		return 1;
