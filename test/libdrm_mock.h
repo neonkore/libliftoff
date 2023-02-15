@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <xf86drm.h>
 #include <xf86drmMode.h>
 
 extern uint32_t liftoff_mock_drm_crtc_id;

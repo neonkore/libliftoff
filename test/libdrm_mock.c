@@ -589,3 +589,10 @@ drmModeFreeFB2(drmModeFB2 *fb2)
 {
 	free(fb2);
 }
+
+int
+drmCloseBufferHandle(int fd, uint32_t handle)
+{
+	errno = EINVAL;
+	return -EINVAL;
+}
