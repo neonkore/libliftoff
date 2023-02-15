@@ -187,6 +187,10 @@ plane_set_prop(struct liftoff_plane *plane, drmModeAtomicReq *req,
 {
 	int ret;
 
+	if (prop->flags & DRM_MODE_PROP_IMMUTABLE) {
+		return -EINVAL;
+	}
+
 	ret = drmModeAtomicAddProperty(req, plane->id, prop->prop_id, value);
 	if (ret < 0) {
 		liftoff_log(LIFTOFF_ERROR, "drmModeAtomicAddProperty: %s",
