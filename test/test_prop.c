@@ -358,6 +358,118 @@ test_in_formats(void)
 	return 0;
 }
 
+static int
+test_type(const drmModePropertyRes *prop, uint64_t valid_value,
+	  uint64_t invalid_value)
+{
+	struct liftoff_mock_plane *mock_plane;
+	int drm_fd;
+	struct liftoff_device *device;
+	struct liftoff_output *output;
+	struct liftoff_layer *layer;
+
+	mock_plane = liftoff_mock_drm_create_plane(DRM_PLANE_TYPE_PRIMARY);
+	liftoff_mock_plane_add_property(mock_plane, prop, 0);
+
+	drm_fd = liftoff_mock_drm_open();
+	device = liftoff_device_create(drm_fd);
+	assert(device != NULL);
+
+	liftoff_device_register_all_planes(device);
+
+	output = liftoff_output_create(device, liftoff_mock_drm_crtc_id);
+	layer = add_layer(output, 0, 0, 1920, 1080);
+
+	liftoff_mock_plane_add_compatible_layer(mock_plane, layer);
+
+	/* First commit with a valid prop value */
+	liftoff_layer_set_property(layer, prop->name, valid_value);
+	commit(drm_fd, output);
+	assert(liftoff_mock_plane_get_layer(mock_plane) != NULL);
+
+	/* Second commit with an invalid prop value: even if the plane is
+	 * compatible with the layer, the invalid value should be checked by
+	 * libliftoff and rejected before any test commit happens */
+	liftoff_layer_set_property(layer, prop->name, invalid_value);
+	commit(drm_fd, output);
+	assert(liftoff_mock_plane_get_layer(mock_plane) == NULL);
+
+	liftoff_device_destroy(device);
+	close(drm_fd);
+
+	return 0;
+}
+
+static int
+test_range(void)
+{
+	drmModePropertyRes prop = {0};
+	uint64_t range[2];
+
+	range[0] = 0;
+	range[1] = 0xFFFF;
+	strncpy(prop.name, "alpha", sizeof(prop.name) - 1);
+	prop.flags = DRM_MODE_PROP_RANGE;
+	prop.count_values = 2;
+	prop.values = range;
+
+	return test_type(&prop, 42, 0xFFFF + 42);
+}
+
+static int
+test_signed_range(void)
+{
+	drmModePropertyRes prop = {0};
+	uint64_t range[2];
+
+	range[0] = (uint64_t)-1;
+	range[1] = INT64_MAX;
+	strncpy(prop.name, "IN_FENCE_FD", sizeof(prop.name) - 1);
+	prop.flags = DRM_MODE_PROP_SIGNED_RANGE;
+	prop.count_values = 2;
+	prop.values = range;
+
+	return test_type(&prop, (uint64_t)-1, (uint64_t)-2);
+}
+
+static int
+test_enum(void)
+{
+	drmModePropertyRes prop = {0};
+	struct drm_mode_property_enum enums[3] = {0};
+
+	enums[0].value = 0;
+	strncpy(enums[0].name, "rotate-0", sizeof(enums[0].name) - 1);
+	enums[1].value = 1;
+	strncpy(enums[1].name, "rotate-90", sizeof(enums[1].name) - 1);
+	enums[2].value = 2;
+	strncpy(enums[2].name, "rotate-180", sizeof(enums[2].name) - 1);
+	strncpy(prop.name, "rotation", sizeof(prop.name) - 1);
+	prop.flags = DRM_MODE_PROP_BITMASK;
+	prop.enums = enums;
+	prop.count_enums = 3;
+
+	return test_type(&prop, DRM_MODE_ROTATE_90, DRM_MODE_REFLECT_X);
+}
+
+static int
+test_bitmask(void)
+{
+	drmModePropertyRes prop = {0};
+	struct drm_mode_property_enum enums[2] = {0};
+
+	enums[0].value = 0;
+	strncpy(enums[0].name, "YCbCr limited range", sizeof(enums[0].name) - 1);
+	enums[1].value = 1;
+	strncpy(enums[1].name, "YCbCr full range", sizeof(enums[1].name) - 1);
+	strncpy(prop.name, "COLOR_RANGE", sizeof(prop.name) - 1);
+	prop.flags = DRM_MODE_PROP_ENUM;
+	prop.enums = enums;
+	prop.count_enums = 2;
+
+	return test_type(&prop, 1, 2);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -385,6 +497,14 @@ main(int argc, char *argv[])
 		return test_unset_prop();
 	} else if (strcmp(test_name, "in-formats") == 0) {
 		return test_in_formats();
+	} else if (strcmp(test_name, "range") == 0) {
+		return test_range();
+	} else if (strcmp(test_name, "signed-range") == 0) {
+		return test_signed_range();
+	} else if (strcmp(test_name, "enum") == 0) {
+		return test_enum();
+	} else if (strcmp(test_name, "bitmask") == 0) {
+		return test_bitmask();
 	} else {
 		fprintf(stderr, "no such test: %s\n", test_name);
 		return 1;

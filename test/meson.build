@@ -79,6 +79,10 @@ tests = {
 		'unmatched',
 		'unset',
 		'in-formats',
+		'range',
+		'signed-range',
+		'enum',
+		'bitmask',
 	],
 	'candidate': [
 		'basic',
