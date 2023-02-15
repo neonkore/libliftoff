@@ -294,15 +294,14 @@ get_prop_index(uint32_t id)
 
 uint32_t
 liftoff_mock_plane_add_property(struct liftoff_mock_plane *plane,
-				const drmModePropertyRes *prop)
+				const drmModePropertyRes *prop,
+				uint64_t value)
 {
 	uint32_t prop_id;
 
 	prop_id = register_prop(prop);
 	plane->enabled_props[get_prop_index(prop_id)] = true;
-	if (prop->count_values == 1) {
-		plane->prop_values[get_prop_index(prop_id)] = prop->values[0];
-	}
+	plane->prop_values[get_prop_index(prop_id)] = value;
 	return prop_id;
 }
 

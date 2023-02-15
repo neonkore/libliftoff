@@ -360,17 +360,17 @@ run(const struct test_case *test)
 	prop_name = "alpha";
 	prop = (drmModePropertyRes){0};
 	strncpy(prop.name, prop_name, sizeof(prop.name) - 1);
-	liftoff_mock_plane_add_property(ctx.mock_plane, &prop);
+	liftoff_mock_plane_add_property(ctx.mock_plane, &prop, 0);
 
 	prop_name = "IN_FENCE_FD";
 	prop = (drmModePropertyRes){0};
 	strncpy(prop.name, prop_name, sizeof(prop.name) - 1);
-	liftoff_mock_plane_add_property(ctx.mock_plane, &prop);
+	liftoff_mock_plane_add_property(ctx.mock_plane, &prop, (uint64_t)-1);
 
 	prop_name = "FB_DAMAGE_CLIPS";
 	prop = (drmModePropertyRes){0};
 	strncpy(prop.name, prop_name, sizeof(prop.name) - 1);
-	liftoff_mock_plane_add_property(ctx.mock_plane, &prop);
+	liftoff_mock_plane_add_property(ctx.mock_plane, &prop, 0);
 
 	ctx.drm_fd = liftoff_mock_drm_open();
 	device = liftoff_device_create(ctx.drm_fd);

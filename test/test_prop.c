@@ -60,7 +60,7 @@ test_prop_default(const char *prop_name)
 	 * device */
 	drmModePropertyRes prop = {0};
 	strncpy(prop.name, prop_name, sizeof(prop.name) - 1);
-	liftoff_mock_plane_add_property(mock_plane_with_prop, &prop);
+	liftoff_mock_plane_add_property(mock_plane_with_prop, &prop, 0);
 
 	drm_fd = liftoff_mock_drm_open();
 	device = liftoff_device_create(drm_fd);
@@ -139,7 +139,7 @@ test_ignore_alpha(void)
 	mock_plane = liftoff_mock_drm_create_plane(DRM_PLANE_TYPE_PRIMARY);
 
 	strncpy(prop.name, "alpha", sizeof(prop.name) - 1);
-	liftoff_mock_plane_add_property(mock_plane, &prop);
+	liftoff_mock_plane_add_property(mock_plane, &prop, 0);
 
 	drm_fd = liftoff_mock_drm_open();
 	device = liftoff_device_create(drm_fd);
@@ -173,7 +173,6 @@ test_immutable_zpos(void)
 {
 	struct liftoff_mock_plane *mock_plane1, *mock_plane2;
 	drmModePropertyRes prop = {0};
-	uint64_t prop_value;
 	int drm_fd;
 	struct liftoff_device *device;
 	struct liftoff_output *output;
@@ -186,14 +185,10 @@ test_immutable_zpos(void)
 
 	strncpy(prop.name, "zpos", sizeof(prop.name) - 1);
 	prop.flags = DRM_MODE_PROP_IMMUTABLE;
-	prop.count_values = 1;
-	prop.values = &prop_value;
 
 	/* Plane 2 is always on top of plane 1, and this is immutable */
-	prop_value = 1;
-	liftoff_mock_plane_add_property(mock_plane1, &prop);
-	prop_value = 2;
-	liftoff_mock_plane_add_property(mock_plane2, &prop);
+	liftoff_mock_plane_add_property(mock_plane1, &prop, 1);
+	liftoff_mock_plane_add_property(mock_plane2, &prop, 2);
 
 	drm_fd = liftoff_mock_drm_open();
 	device = liftoff_device_create(drm_fd);

@@ -42,6 +42,7 @@ liftoff_mock_plane_get_id(struct liftoff_mock_plane *plane);
 
 uint32_t
 liftoff_mock_plane_add_property(struct liftoff_mock_plane *plane,
-				const drmModePropertyRes *prop);
+				const drmModePropertyRes *prop,
+				uint64_t value);
 
 #endif

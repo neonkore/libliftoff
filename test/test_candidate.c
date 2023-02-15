@@ -46,7 +46,7 @@ test_basic(void)
 	 * should mark that one as a possible candidate, but not the other
 	 * one. */
 	strncpy(prop.name, "COLOR_RANGE", sizeof(prop.name) - 1);
-	liftoff_mock_plane_add_property(mock_plane_ok, &prop);
+	liftoff_mock_plane_add_property(mock_plane_ok, &prop, 0);
 
 	drm_fd = liftoff_mock_drm_open();
 	device = liftoff_device_create(drm_fd);
