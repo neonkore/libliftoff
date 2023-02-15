@@ -182,6 +182,55 @@ plane_get_property(struct liftoff_plane *plane, const char *name)
 }
 
 static int
+check_range_prop(const drmModePropertyRes *prop, uint64_t value)
+{
+	if (value < prop->values[0] || value > prop->values[1]) {
+		return -EINVAL;
+	}
+	return 0;
+}
+
+static int
+check_enum_prop(const drmModePropertyRes *prop, uint64_t value)
+{
+	int i;
+
+	for (i = 0; i < prop->count_enums; i++) {
+		if (prop->enums[i].value == value) {
+			return 0;
+		}
+	}
+	return -EINVAL;
+}
+
+static int
+check_bitmask_prop(const drmModePropertyRes *prop, uint64_t value)
+{
+	int i;
+	uint64_t mask;
+
+	mask = 0;
+	for (i = 0; i < prop->count_enums; i++) {
+		mask |= 1 << prop->enums[i].value;
+	}
+
+	if ((value & ~mask) != 0) {
+		return -EINVAL;
+	}
+	return 0;
+}
+
+static int
+check_signed_range_prop(const drmModePropertyRes *prop, uint64_t value)
+{
+	if ((int64_t) value < (int64_t) prop->values[0] ||
+	    (int64_t) value > (int64_t) prop->values[1]) {
+		return -EINVAL;
+	}
+	return 0;
+}
+
+static int
 plane_set_prop(struct liftoff_plane *plane, drmModeAtomicReq *req,
 	       const drmModePropertyRes *prop, uint64_t value)
 {
@@ -189,6 +238,27 @@ plane_set_prop(struct liftoff_plane *plane, drmModeAtomicReq *req,
 
 	if (prop->flags & DRM_MODE_PROP_IMMUTABLE) {
 		return -EINVAL;
+	}
+
+	/* Manually check the property value if we can: this may avoid
+	 * unnecessary test commits */
+	ret = 0;
+	switch (drmModeGetPropertyType(prop)) {
+	case DRM_MODE_PROP_RANGE:
+		ret = check_range_prop(prop, value);
+		break;
+	case DRM_MODE_PROP_ENUM:
+		ret = check_enum_prop(prop, value);
+		break;
+	case DRM_MODE_PROP_BITMASK:
+		ret = check_bitmask_prop(prop, value);
+		break;
+	case DRM_MODE_PROP_SIGNED_RANGE:
+		ret = check_signed_range_prop(prop, value);
+		break;
+	}
+	if (ret != 0) {
+		return ret;
 	}
 
 	ret = drmModeAtomicAddProperty(req, plane->id, prop->prop_id, value);

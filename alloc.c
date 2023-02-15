@@ -519,7 +519,6 @@ apply_current(struct liftoff_device *device, drmModeAtomicReq *req)
 
 	liftoff_list_for_each(plane, &device->planes, link) {
 		ret = plane_apply(plane, plane->layer, req);
-		assert(ret != -EINVAL);
 		if (ret != 0) {
 			drmModeAtomicSetCursor(req, cursor);
 			return ret;
