@@ -14,7 +14,10 @@
 #define MAX_PLANE_PROPS 64
 #define MAX_REQ_PROPS 1024
 
-uint32_t liftoff_mock_drm_crtc_id = 0xCC000000;
+#define OBJ_INDEX_MASK 0x00FFFFFF
+#define OBJ_TYPE_MASK 0xFF000000
+
+uint32_t liftoff_mock_drm_crtc_id = DRM_MODE_OBJECT_CRTC & OBJ_TYPE_MASK;
 size_t liftoff_mock_commit_count = 0;
 bool liftoff_mock_require_primary_plane = false;
 
@@ -66,6 +69,20 @@ static drmModePropertyRes plane_props[MAX_PLANE_PROPS] = {0};
 
 static size_t plane_props_len = 0;
 
+static uint32_t
+object_id(size_t index, uint32_t type)
+{
+	assert((type & OBJ_TYPE_MASK) != 0);
+	return index | (type & OBJ_TYPE_MASK);
+}
+
+static size_t
+object_index(uint32_t id, uint32_t type)
+{
+	assert((id & OBJ_TYPE_MASK) == (type & OBJ_TYPE_MASK));
+	return id & OBJ_INDEX_MASK;
+}
+
 static void
 assert_drm_fd(int fd)
 {
@@ -89,7 +106,7 @@ register_prop(const drmModePropertyRes *prop)
 	assert(plane_props_len < MAX_PLANE_PROPS);
 	dst = &plane_props[plane_props_len];
 	memcpy(dst, prop, sizeof(*dst));
-	dst->prop_id = 0xB0000000 + plane_props_len;
+	dst->prop_id = object_id(plane_props_len, DRM_MODE_OBJECT_PROPERTY);
 	plane_props_len++;
 
 	return dst->prop_id;
@@ -142,7 +159,7 @@ liftoff_mock_drm_create_plane(int type)
 		i++;
 	}
 
-	plane->id = 0xEE000000 + i;
+	plane->id = object_id(i, DRM_MODE_OBJECT_PLANE);
 	plane->prop_values[PLANE_TYPE] = type;
 
 	for (size_t i = 0; i < basic_plane_props_len; i++) {
@@ -196,7 +213,7 @@ liftoff_mock_drm_create_fb(struct liftoff_layer *layer)
 
 	mock_fbs[i] = layer;
 
-	return 0xFB000000 + i;
+	return object_id(i, DRM_MODE_OBJECT_FB);
 }
 
 static bool
@@ -206,7 +223,7 @@ mock_atomic_req_get_property(drmModeAtomicReq *req, uint32_t obj_id,
 	ssize_t i;
 	uint32_t prop_id;
 
-	prop_id = 0xB0000000 + prop;
+	prop_id = object_id(prop, DRM_MODE_OBJECT_PROPERTY);
 	for (i = req->cursor - 1; i >= 0; i--) {
 		if (req->props[i].obj_id == obj_id &&
 		    req->props[i].prop_id == prop_id) {
@@ -227,9 +244,7 @@ mock_fb_get_layer(uint32_t fb_id)
 		return NULL;
 	}
 
-	assert((fb_id & 0xFF000000) == 0xFB000000);
-
-	i = fb_id & 0x00FFFFFF;
+	i = object_index(fb_id, DRM_MODE_OBJECT_FB);
 	assert(i < MAX_LAYERS);
 
 	return mock_fbs[i];
@@ -246,9 +261,7 @@ get_prop_index(uint32_t id)
 {
 	size_t i;
 
-	assert((id & 0xFF000000) == 0xB0000000);
-
-	i = id & 0x00FFFFFF;
+	i = object_index(id, DRM_MODE_OBJECT_PROPERTY);
 	assert(i < plane_props_len);
 
 	return i;
