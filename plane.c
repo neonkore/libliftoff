@@ -40,8 +40,7 @@ liftoff_plane_create(struct liftoff_device *device, uint32_t id)
 	drmModePlane *drm_plane;
 	drmModeObjectProperties *drm_props;
 	uint32_t i;
-	drmModePropertyRes *drm_prop;
-	struct liftoff_plane_property *prop;
+	drmModePropertyRes *prop;
 	uint64_t value;
 	bool has_type = false, has_zpos = false;
 
@@ -75,25 +74,20 @@ liftoff_plane_create(struct liftoff_device *device, uint32_t id)
 		liftoff_log_errno(LIFTOFF_ERROR, "drmModeObjectGetProperties");
 		return NULL;
 	}
-	plane->props = calloc(drm_props->count_props,
-			      sizeof(struct liftoff_plane_property));
+	plane->props = calloc(drm_props->count_props, sizeof(plane->props[0]));
 	if (plane->props == NULL) {
 		liftoff_log_errno(LIFTOFF_ERROR, "calloc");
 		drmModeFreeObjectProperties(drm_props);
 		return NULL;
 	}
 	for (i = 0; i < drm_props->count_props; i++) {
-		drm_prop = drmModeGetProperty(device->drm_fd,
-					      drm_props->props[i]);
-		if (drm_prop == NULL) {
+		prop = drmModeGetProperty(device->drm_fd, drm_props->props[i]);
+		if (prop == NULL) {
 			liftoff_log_errno(LIFTOFF_ERROR, "drmModeGetProperty");
 			drmModeFreeObjectProperties(drm_props);
 			return NULL;
 		}
-		prop = &plane->props[i];
-		memcpy(prop->name, drm_prop->name, sizeof(prop->name));
-		prop->id = drm_prop->prop_id;
-		drmModeFreeProperty(drm_prop);
+		plane->props[i] = prop;
 		plane->props_len++;
 
 		value = drm_props->prop_values[i];
@@ -152,9 +146,16 @@ liftoff_plane_create(struct liftoff_device *device, uint32_t id)
 void
 liftoff_plane_destroy(struct liftoff_plane *plane)
 {
+	size_t i;
+
 	if (plane->layer != NULL) {
 		plane->layer->plane = NULL;
 	}
+
+	for (i = 0; i < plane->props_len; i++) {
+		drmModeFreeProperty(plane->props[i]);
+	}
+
 	liftoff_list_remove(&plane->link);
 	free(plane->props);
 	drmModeFreePropertyBlob(plane->in_formats_blob);
@@ -167,14 +168,14 @@ liftoff_plane_get_id(struct liftoff_plane *plane)
 	return plane->id;
 }
 
-static struct liftoff_plane_property *
+static const drmModePropertyRes *
 plane_get_property(struct liftoff_plane *plane, const char *name)
 {
 	size_t i;
 
 	for (i = 0; i < plane->props_len; i++) {
-		if (strcmp(plane->props[i].name, name) == 0) {
-			return &plane->props[i];
+		if (strcmp(plane->props[i]->name, name) == 0) {
+			return plane->props[i];
 		}
 	}
 	return NULL;
@@ -182,11 +183,11 @@ plane_get_property(struct liftoff_plane *plane, const char *name)
 
 static int
 plane_set_prop(struct liftoff_plane *plane, drmModeAtomicReq *req,
-	       struct liftoff_plane_property *prop, uint64_t value)
+	       const drmModePropertyRes *prop, uint64_t value)
 {
 	int ret;
 
-	ret = drmModeAtomicAddProperty(req, plane->id, prop->id, value);
+	ret = drmModeAtomicAddProperty(req, plane->id, prop->prop_id, value);
 	if (ret < 0) {
 		liftoff_log(LIFTOFF_ERROR, "drmModeAtomicAddProperty: %s",
 			    strerror(-ret));
@@ -200,7 +201,7 @@ static int
 set_plane_prop_str(struct liftoff_plane *plane, drmModeAtomicReq *req,
 		   const char *name, uint64_t value)
 {
-	struct liftoff_plane_property *prop;
+	const drmModePropertyRes *prop;
 
 	prop = plane_get_property(plane, name);
 	if (prop == NULL) {
@@ -271,7 +272,7 @@ plane_apply(struct liftoff_plane *plane, struct liftoff_layer *layer,
 	int cursor, ret;
 	size_t i;
 	struct liftoff_layer_property *layer_prop;
-	struct liftoff_plane_property *plane_prop;
+	const drmModePropertyRes *plane_prop;
 
 	cursor = drmModeAtomicGetCursor(req);
 

@@ -72,16 +72,11 @@ struct liftoff_plane {
 	/* TODO: formats */
 	struct liftoff_list link; /* liftoff_device.planes */
 
-	struct liftoff_plane_property *props;
+	drmModePropertyRes **props;
 	size_t props_len;
 	drmModePropertyBlobRes *in_formats_blob;
 
 	struct liftoff_layer *layer;
-};
-
-struct liftoff_plane_property {
-	char name[DRM_PROP_NAME_LEN];
-	uint32_t id;
 };
 
 struct liftoff_rect {
