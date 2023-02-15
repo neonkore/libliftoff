@@ -63,6 +63,7 @@ pkgconfig.generate(
 	filebase: meson.project_name(),
 	name: meson.project_name(),
 	description: 'KMS plane library',
+	url: 'https://gitlab.freedesktop.org/emersion/libliftoff',
 )
 
 subdir('example')
