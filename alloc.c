@@ -548,6 +548,8 @@ layer_needs_realloc(struct liftoff_layer *layer)
 	struct liftoff_layer_property *prop;
 
 	if (layer->changed) {
+		liftoff_log(LIFTOFF_DEBUG, "Cannot re-use previous allocation: "
+			    "layer property added or force composition changed");
 		return true;
 	}
 
@@ -567,11 +569,15 @@ layer_needs_realloc(struct liftoff_layer *layer)
 			}
 
 			if (prop->value == 0 || prop->prev_value == 0) {
+				liftoff_log(LIFTOFF_DEBUG, "Cannot re-use previous allocation: "
+					    "layer enabled or disabled");
 				return true;
 			}
 
 			if (fb_info_needs_realloc(&layer->fb_info,
 						  &layer->prev_fb_info)) {
+				liftoff_log(LIFTOFF_DEBUG, "Cannot re-use previous allocation: "
+					    "FB info changed");
 				return true;
 			}
 
@@ -590,6 +596,8 @@ layer_needs_realloc(struct liftoff_layer *layer)
 		if (strcmp(prop->name, "alpha") == 0) {
 			if (prop->value == 0 || prop->prev_value == 0 ||
 			    prop->value == 0xFFFF || prop->prev_value == 0xFFFF) {
+				liftoff_log(LIFTOFF_DEBUG, "Cannot re-use previous allocation: "
+					    "alpha changed");
 				return true;
 			}
 			continue;
@@ -604,6 +612,8 @@ layer_needs_realloc(struct liftoff_layer *layer)
 
 		/* TODO: if CRTC_{X,Y,W,H} changed but intersection with other
 		 * layers hasn't changed, don't realloc */
+		liftoff_log(LIFTOFF_DEBUG, "Cannot re-use previous allocation: "
+			    "property \"%s\" changed", prop->name);
 		return true;
 	}
 
@@ -621,6 +631,8 @@ reuse_previous_alloc(struct liftoff_output *output, drmModeAtomicReq *req,
 	device = output->device;
 
 	if (output->layers_changed) {
+		liftoff_log(LIFTOFF_DEBUG, "Cannot re-use previous allocation: "
+			    "a layer has been added or removed");
 		return -EINVAL;
 	}
 
