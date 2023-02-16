@@ -47,6 +47,7 @@ main(int argc, char *argv[])
 	struct liftoff_layer *layers[MAX_LAYERS];
 	drmModeAtomicReq *req;
 	int ret;
+	double dur_ms;
 
 	planes_len = 5;
 	layers_len = 10;
@@ -108,8 +109,8 @@ main(int argc, char *argv[])
 
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
-	double dur_ms = ((double)end.tv_sec - (double)start.tv_sec) * 1000 +
-			((double)end.tv_nsec - (double)start.tv_nsec) / 1000000;
+	dur_ms = ((double)end.tv_sec - (double)start.tv_sec) * 1000 +
+		 ((double)end.tv_nsec - (double)start.tv_nsec) / 1000000;
 	printf("Plane allocation took %fms\n", dur_ms);
 	printf("Plane allocation performed %zu atomic test commits\n",
 	       liftoff_mock_commit_count);

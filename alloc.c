@@ -673,10 +673,10 @@ update_layers_priority(struct liftoff_device *device)
 {
 	struct liftoff_output *output;
 	struct liftoff_layer *layer;
+	bool period_elapsed;
 
 	device->page_flip_counter++;
-	bool period_elapsed =
-		device->page_flip_counter >= LIFTOFF_PRIORITY_PERIOD;
+	period_elapsed = device->page_flip_counter >= LIFTOFF_PRIORITY_PERIOD;
 	if (period_elapsed) {
 		device->page_flip_counter = 0;
 	}

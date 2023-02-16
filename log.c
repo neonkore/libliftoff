@@ -38,11 +38,12 @@ log_has(enum liftoff_log_priority priority)
 void
 liftoff_log(enum liftoff_log_priority priority, const char *fmt, ...)
 {
+	va_list args;
+
 	if (!log_has(priority)) {
 		return;
 	}
 
-	va_list args;
 	va_start(args, fmt);
 	log_handler(priority, fmt, args);
 	va_end(args);

@@ -87,10 +87,14 @@ dumb_fb_init(struct dumb_fb *fb, int drm_fd, uint32_t format, uint32_t width,
 {
 	int ret;
 	uint32_t fb_id;
+	struct drm_mode_create_dumb create;
+	uint32_t handles[4] = {0};
+	uint32_t strides[4] = {0};
+	uint32_t offsets[4] = { 0 };
 
 	assert(format == DRM_FORMAT_ARGB8888 || format == DRM_FORMAT_XRGB8888);
 
-	struct drm_mode_create_dumb create = {
+	create = (struct drm_mode_create_dumb) {
 		.width = width,
 		.height = height,
 		.bpp = 32,
@@ -101,9 +105,8 @@ dumb_fb_init(struct dumb_fb *fb, int drm_fd, uint32_t format, uint32_t width,
 		return false;
 	}
 
-	uint32_t handles[4] = { create.handle };
-	uint32_t strides[4] = { create.pitch };
-	uint32_t offsets[4] = { 0 };
+	handles[0] = create.handle;
+	strides[0] = create.pitch;
 	ret = drmModeAddFB2(drm_fd, width, height, format, handles, strides,
 			    offsets, &fb_id, 0);
 	if (ret < 0) {

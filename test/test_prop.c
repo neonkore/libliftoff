@@ -50,14 +50,15 @@ test_prop_default(const char *prop_name)
 	struct liftoff_device *device;
 	struct liftoff_output *output;
 	struct liftoff_layer *layer;
+	uint64_t require_prop_value, default_value;
+	drmModePropertyRes prop = {0};
 
 	mock_plane_without_prop = liftoff_mock_drm_create_plane(DRM_PLANE_TYPE_OVERLAY);
 	mock_plane_with_prop = liftoff_mock_drm_create_plane(DRM_PLANE_TYPE_OVERLAY);
 
-	/* Value that requires the prop for the plane allocation to succeed */
-	uint64_t require_prop_value;
-	/* Value that doesn't require the prop to be present */
-	uint64_t default_value;
+	/* require_prop_value is a value that requires the prop for the plane
+	 * allocation to succeed. default_value is a value that requires the
+	 * prop for the plane allocation to succeed. */
 	if (strcmp(prop_name, "alpha") == 0) {
 		require_prop_value = (uint16_t)(0.5 * 0xFFFF);
 		default_value = 0xFFFF; /* opaque */
@@ -71,7 +72,6 @@ test_prop_default(const char *prop_name)
 
 	/* We need to setup mock plane properties before creating the liftoff
 	 * device */
-	drmModePropertyRes prop = {0};
 	strncpy(prop.name, prop_name, sizeof(prop.name) - 1);
 	liftoff_mock_plane_add_property(mock_plane_with_prop, &prop, 0);
 
@@ -473,7 +473,7 @@ test_bitmask(void)
 int
 main(int argc, char *argv[])
 {
-	const char *test_name;
+	const char *test_name, *default_test_prefix;
 
 	liftoff_log_set_priority(LIFTOFF_DEBUG);
 
@@ -483,7 +483,7 @@ main(int argc, char *argv[])
 	}
 	test_name = argv[1];
 
-	const char default_test_prefix[] = "default-";
+	default_test_prefix = "default-";
 	if (strncmp(test_name, default_test_prefix,
 	    strlen(default_test_prefix)) == 0) {
 		return test_prop_default(test_name + strlen(default_test_prefix));

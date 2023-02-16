@@ -17,6 +17,7 @@ add_project_arguments(cc.get_supported_arguments([
 	'-Wundef',
 	'-Wmissing-prototypes',
 	'-Walloca',
+	'-Wdeclaration-after-statement',
 
 	'-Wno-missing-braces',
 	'-Wno-unused-parameter',
