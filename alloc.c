@@ -532,8 +532,9 @@ static bool
 fb_info_needs_realloc(const drmModeFB2 *a, const drmModeFB2 *b)
 {
 	if (a->width != b->width || a->height != b->height ||
-	    a->pixel_format != b->pixel_format || a->modifier != b->modifier)
+	    a->pixel_format != b->pixel_format || a->modifier != b->modifier) {
 		return true;
+	}
 
 	/* TODO: consider checking pitch and offset? */
 
