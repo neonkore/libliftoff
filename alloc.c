@@ -562,6 +562,10 @@ layer_needs_realloc(struct liftoff_layer *layer)
 		 * attributes didn't change, we can try to re-use the previous
 		 * allocation. */
 		if (strcmp(prop->name, "FB_ID") == 0) {
+			if (prop->value == 0 && prop->prev_value == 0) {
+				continue;
+			}
+
 			if (prop->value == 0 || prop->prev_value == 0) {
 				return true;
 			}
