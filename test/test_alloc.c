@@ -15,20 +15,20 @@ add_layer(struct liftoff_output *output, int x, int y, int width, int height)
 	layer = liftoff_layer_create(output);
 	fb_id = liftoff_mock_drm_create_fb(layer);
 	liftoff_layer_set_property(layer, "FB_ID", fb_id);
-	liftoff_layer_set_property(layer, "CRTC_X", x);
-	liftoff_layer_set_property(layer, "CRTC_Y", y);
-	liftoff_layer_set_property(layer, "CRTC_W", width);
-	liftoff_layer_set_property(layer, "CRTC_H", height);
+	liftoff_layer_set_property(layer, "CRTC_X", (uint64_t)x);
+	liftoff_layer_set_property(layer, "CRTC_Y", (uint64_t)y);
+	liftoff_layer_set_property(layer, "CRTC_W", (uint64_t)width);
+	liftoff_layer_set_property(layer, "CRTC_H", (uint64_t)height);
 	liftoff_layer_set_property(layer, "SRC_X", 0);
 	liftoff_layer_set_property(layer, "SRC_Y", 0);
-	liftoff_layer_set_property(layer, "SRC_W", width << 16);
-	liftoff_layer_set_property(layer, "SRC_H", height << 16);
+	liftoff_layer_set_property(layer, "SRC_W", (uint64_t)width << 16);
+	liftoff_layer_set_property(layer, "SRC_H", (uint64_t)height << 16);
 
 	return layer;
 }
 
 struct test_plane {
-	int type;
+	uint64_t type;
 };
 
 struct test_prop {
@@ -820,7 +820,7 @@ run_test(const struct test_case *test)
 		plane_index_got = -1;
 		for (j = 0; j < test_setup_len; j++) {
 			if (mock_planes[j] == mock_plane) {
-				plane_index_got = j;
+				plane_index_got = (ssize_t)j;
 				break;
 			}
 		}

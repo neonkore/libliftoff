@@ -334,7 +334,7 @@ layer_add_candidate_plane(struct liftoff_layer *layer,
 			return;
 		}
 		if (empty_slot < 0 && layer->candidate_planes[i] == 0) {
-			empty_slot = i;
+			empty_slot = (ssize_t)i;
 		}
 	}
 

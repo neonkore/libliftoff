@@ -26,8 +26,8 @@ static const uint32_t colors[] = {
 };
 
 static struct liftoff_layer *
-add_layer(int drm_fd, struct liftoff_output *output, int x, int y, int width,
-	  int height, bool with_alpha, bool white, struct dumb_fb *fb)
+add_layer(int drm_fd, struct liftoff_output *output, int x, int y, uint32_t width,
+	  uint32_t height, bool with_alpha, bool white, struct dumb_fb *fb)
 {
 	static size_t color_idx = 0;
 	uint32_t color;
@@ -51,8 +51,8 @@ add_layer(int drm_fd, struct liftoff_output *output, int x, int y, int width,
 
 	layer = liftoff_layer_create(output);
 	liftoff_layer_set_property(layer, "FB_ID", fb->id);
-	liftoff_layer_set_property(layer, "CRTC_X", x);
-	liftoff_layer_set_property(layer, "CRTC_Y", y);
+	liftoff_layer_set_property(layer, "CRTC_X", (uint64_t)x);
+	liftoff_layer_set_property(layer, "CRTC_Y", (uint64_t)y);
 	liftoff_layer_set_property(layer, "CRTC_W", width);
 	liftoff_layer_set_property(layer, "CRTC_H", height);
 	liftoff_layer_set_property(layer, "SRC_X", 0);
@@ -74,12 +74,12 @@ composite(int drm_fd, struct dumb_fb *dst_fb, struct dumb_fb *src_fb, int dst_x,
 	dst = dumb_fb_map(dst_fb, drm_fd);
 	src = dumb_fb_map(src_fb, drm_fd);
 
-	src_width = src_fb->width;
+	src_width = (int)src_fb->width;
 	if (dst_x < 0) {
 		dst_x = 0;
 	}
 	if (dst_x + src_width > (int)dst_fb->width) {
-		src_width = dst_fb->width - dst_x;
+		src_width = (int)dst_fb->width - dst_x;
 	}
 
 	for (i = 0; i < (int)src_fb->height; i++) {
@@ -87,10 +87,10 @@ composite(int drm_fd, struct dumb_fb *dst_fb, struct dumb_fb *src_fb, int dst_x,
 		if (y < 0 || y >= (int)dst_fb->height) {
 			continue;
 		}
-		memcpy(dst + dst_fb->stride * y +
-			     dst_x * sizeof(uint32_t),
-		       src + src_fb->stride * i,
-		       src_width * sizeof(uint32_t));
+		memcpy(dst + dst_fb->stride * (size_t)y +
+			     (size_t)dst_x * sizeof(uint32_t),
+		       src + src_fb->stride * (size_t)i,
+		       (size_t)src_width * sizeof(uint32_t));
 	}
 
 	munmap(dst, dst_fb->size);
@@ -122,7 +122,7 @@ main(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "l:h")) != -1) {
 		switch (opt) {
 		case 'l':
-			layers_len = atoi(optarg);
+			layers_len = (size_t)atoi(optarg);
 			break;
 		default:
 			fprintf(stderr,

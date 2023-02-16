@@ -23,8 +23,8 @@ static const uint32_t colors[] = {
 };
 
 static struct liftoff_layer *
-add_layer(int drm_fd, struct liftoff_output *output, int x, int y, int width,
-	  int height, bool with_alpha)
+add_layer(int drm_fd, struct liftoff_output *output, int x, int y, uint32_t width,
+	  uint32_t height, bool with_alpha)
 {
 	static bool first = true;
 	static size_t color_idx = 0;
@@ -51,8 +51,8 @@ add_layer(int drm_fd, struct liftoff_output *output, int x, int y, int width,
 
 	layer = liftoff_layer_create(output);
 	liftoff_layer_set_property(layer, "FB_ID", fb.id);
-	liftoff_layer_set_property(layer, "CRTC_X", x);
-	liftoff_layer_set_property(layer, "CRTC_Y", y);
+	liftoff_layer_set_property(layer, "CRTC_X", (uint64_t)x);
+	liftoff_layer_set_property(layer, "CRTC_Y", (uint64_t)y);
 	liftoff_layer_set_property(layer, "CRTC_W", width);
 	liftoff_layer_set_property(layer, "CRTC_H", height);
 	liftoff_layer_set_property(layer, "SRC_X", 0);

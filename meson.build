@@ -19,6 +19,7 @@ add_project_arguments(cc.get_supported_arguments([
 	'-Walloca',
 	'-Wdeclaration-after-statement',
 	'-Wfloat-conversion',
+	'-Wsign-conversion',
 
 	'-Wno-missing-braces',
 	'-Wno-unused-parameter',

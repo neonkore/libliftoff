@@ -149,7 +149,7 @@ liftoff_mock_drm_open(void)
 }
 
 struct liftoff_mock_plane *
-liftoff_mock_drm_create_plane(int type)
+liftoff_mock_drm_create_plane(uint64_t type)
 {
 	struct liftoff_mock_plane *plane;
 	size_t i;

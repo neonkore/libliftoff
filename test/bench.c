@@ -20,14 +20,14 @@ add_layer(struct liftoff_output *output, int x, int y, int width, int height)
 	layer = liftoff_layer_create(output);
 	fb_id = liftoff_mock_drm_create_fb(layer);
 	liftoff_layer_set_property(layer, "FB_ID", fb_id);
-	liftoff_layer_set_property(layer, "CRTC_X", x);
-	liftoff_layer_set_property(layer, "CRTC_Y", y);
-	liftoff_layer_set_property(layer, "CRTC_W", width);
-	liftoff_layer_set_property(layer, "CRTC_H", height);
+	liftoff_layer_set_property(layer, "CRTC_X", (uint64_t)x);
+	liftoff_layer_set_property(layer, "CRTC_Y", (uint64_t)y);
+	liftoff_layer_set_property(layer, "CRTC_W", (uint64_t)width);
+	liftoff_layer_set_property(layer, "CRTC_H", (uint64_t)height);
 	liftoff_layer_set_property(layer, "SRC_X", 0);
 	liftoff_layer_set_property(layer, "SRC_Y", 0);
-	liftoff_layer_set_property(layer, "SRC_W", width << 16);
-	liftoff_layer_set_property(layer, "SRC_H", height << 16);
+	liftoff_layer_set_property(layer, "SRC_W", (uint64_t)width << 16);
+	liftoff_layer_set_property(layer, "SRC_H", (uint64_t)height << 16);
 
 	return layer;
 }
@@ -40,7 +40,7 @@ main(int argc, char *argv[])
 	struct timespec start, end;
 	struct liftoff_mock_plane *mock_planes[MAX_PLANES];
 	size_t i, j;
-	int plane_type;
+	uint64_t plane_type;
 	int drm_fd;
 	struct liftoff_device *device;
 	struct liftoff_output *output;
@@ -54,10 +54,10 @@ main(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "p:l:")) != -1) {
 		switch (opt) {
 		case 'p':
-			planes_len = atoi(optarg);
+			planes_len = (size_t)atoi(optarg);
 			break;
 		case 'l':
-			layers_len = atoi(optarg);
+			layers_len = (size_t)atoi(optarg);
 			break;
 		default:
 			fprintf(stderr, "usage: %s [-p planes] [-l layers]\n",

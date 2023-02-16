@@ -27,7 +27,7 @@ void
 liftoff_mock_drm_set_fb_info(const drmModeFB2 *fb_info);
 
 struct liftoff_mock_plane *
-liftoff_mock_drm_create_plane(int type);
+liftoff_mock_drm_create_plane(uint64_t type);
 
 struct liftoff_mock_plane *
 liftoff_mock_drm_get_plane(uint32_t id);

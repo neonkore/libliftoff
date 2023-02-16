@@ -134,7 +134,7 @@ dumb_fb_map(struct dumb_fb *fb, int drm_fd)
 	}
 
 	return mmap(0, fb->size, PROT_READ | PROT_WRITE, MAP_SHARED, drm_fd,
-		    map.offset);
+		    (off_t)map.offset);
 }
 
 void

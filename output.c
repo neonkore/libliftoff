@@ -15,7 +15,7 @@ liftoff_output_create(struct liftoff_device *device, uint32_t crtc_id)
 	crtc_index = -1;
 	for (i = 0; i < device->crtcs_len; i++) {
 		if (device->crtcs[i] == crtc_id) {
-			crtc_index = i;
+			crtc_index = (ssize_t)i;
 			break;
 		}
 	}
@@ -29,7 +29,7 @@ liftoff_output_create(struct liftoff_device *device, uint32_t crtc_id)
 	}
 	output->device = device;
 	output->crtc_id = crtc_id;
-	output->crtc_index = crtc_index;
+	output->crtc_index = (size_t)crtc_index;
 	liftoff_list_init(&output->layers);
 	liftoff_list_insert(&device->outputs, &output->link);
 	return output;

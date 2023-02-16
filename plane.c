@@ -211,7 +211,7 @@ check_bitmask_prop(const drmModePropertyRes *prop, uint64_t value)
 
 	mask = 0;
 	for (i = 0; i < prop->count_enums; i++) {
-		mask |= 1 << prop->enums[i].value;
+		mask |= (uint64_t)1 << prop->enums[i].value;
 	}
 
 	if ((value & ~mask) != 0) {
@@ -311,7 +311,7 @@ plane_check_layer_fb(struct liftoff_plane *plane, struct liftoff_layer *layer)
 	format_index = -1;
 	for (i = 0; i < set->count_formats; ++i) {
 		if (formats[i] == layer->fb_info.pixel_format) {
-			format_index = i;
+			format_index = (ssize_t)i;
 			break;
 		}
 	}
@@ -323,7 +323,7 @@ plane_check_layer_fb(struct liftoff_plane *plane, struct liftoff_layer *layer)
 	modifier_index = -1;
 	for (i = 0; i < set->count_modifiers; i++) {
 		if (modifiers[i].modifier == layer->fb_info.modifier) {
-			modifier_index = i;
+			modifier_index = (ssize_t)i;
 			break;
 		}
 	}

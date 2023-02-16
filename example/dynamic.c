@@ -35,7 +35,7 @@ static size_t active_layer_idx = 2;
 
 static bool
 init_layer(int drm_fd, struct example_layer *layer,
-	   struct liftoff_output *output, int width, int height,
+	   struct liftoff_output *output, uint32_t width, uint32_t height,
 	   bool with_alpha)
 {
 	static size_t color_idx = 0;
@@ -83,8 +83,8 @@ draw_layer(int drm_fd, struct example_layer *layer)
 	dumb_fb_fill(fb, drm_fd, color);
 
 	liftoff_layer_set_property(layer->layer, "FB_ID", fb->id);
-	liftoff_layer_set_property(layer->layer, "CRTC_X", layer->x);
-	liftoff_layer_set_property(layer->layer, "CRTC_Y", layer->y);
+	liftoff_layer_set_property(layer->layer, "CRTC_X", (uint64_t)layer->x);
+	liftoff_layer_set_property(layer->layer, "CRTC_Y", (uint64_t)layer->y);
 }
 
 static bool
