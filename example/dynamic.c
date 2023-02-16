@@ -60,7 +60,7 @@ init_layer(int drm_fd, struct example_layer *layer,
 	layer->color[color_idx % 3] = color_value;
 	color_idx++;
 	if (color_idx % 3 == 0) {
-		color_value -= 0.1;
+		color_value -= 0.1f;
 	}
 
 	return true;
@@ -101,8 +101,8 @@ draw(void)
 
 	inc = (active_layer->dec + 1) % 3;
 
-	active_layer->color[inc] += 0.05;
-	active_layer->color[active_layer->dec] -= 0.05;
+	active_layer->color[inc] += 0.05f;
+	active_layer->color[active_layer->dec] -= 0.05f;
 
 	if (active_layer->color[active_layer->dec] < 0.0f) {
 		active_layer->color[inc] = 1.0f;
