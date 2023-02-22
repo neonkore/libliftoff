@@ -148,6 +148,10 @@ liftoff_plane_destroy(struct liftoff_plane *plane)
 {
 	size_t i;
 
+	if (plane == NULL) {
+		return;
+	}
+
 	if (plane->layer != NULL) {
 		plane->layer->plane = NULL;
 	}
