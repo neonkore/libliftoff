@@ -199,8 +199,8 @@ main(int argc, char *argv[])
 		   crtc->mode.vdisplay, false);
 	for (i = 1; i < LAYERS_LEN; i++) {
 		init_layer(drm_fd, &layers[i], output, 100, 100, i % 2);
-		layers[i].x = 100 * i;
-		layers[i].y = 100 * i;
+		layers[i].x = 100 * (int)i;
+		layers[i].y = 100 * (int)i;
 	}
 
 	for (i = 0; i < LAYERS_LEN; i++) {

@@ -120,7 +120,7 @@ main(int argc, char *argv[])
 	layers[0] = add_layer(drm_fd, output, 0, 0, crtc->mode.hdisplay,
 			      crtc->mode.vdisplay, false);
 	for (i = 1; i < LAYERS_LEN; i++) {
-		layers[i] = add_layer(drm_fd, output, 100 * i, 100 * i,
+		layers[i] = add_layer(drm_fd, output, 100 * (int)i, 100 * (int)i,
 				      256, 256, i % 2);
 	}
 

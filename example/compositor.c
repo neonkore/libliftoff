@@ -182,7 +182,7 @@ main(int argc, char *argv[])
 	layers[0] = add_layer(drm_fd, output, 0, 0, crtc->mode.hdisplay,
 			      crtc->mode.vdisplay, false, true, &fbs[0]);
 	for (i = 1; i < layers_len; i++) {
-		layers[i] = add_layer(drm_fd, output, 100 * i, 100 * i,
+		layers[i] = add_layer(drm_fd, output, 100 * (int)i, 100 * (int)i,
 				      256, 256, i % 2, false, &fbs[i]);
 	}
 
@@ -205,7 +205,7 @@ main(int argc, char *argv[])
 	for (i = 1; i < layers_len; i++) {
 		if (liftoff_layer_needs_composition(layers[i])) {
 			composite(drm_fd, &composition_fb, &fbs[i],
-				  i * 100, i * 100);
+				  (int)i * 100, (int)i * 100);
 		}
 	}
 

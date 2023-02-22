@@ -12,7 +12,7 @@
 #define MAX_LAYERS 128
 
 static struct liftoff_layer *
-add_layer(struct liftoff_output *output, int x, int y, int width, int height)
+add_layer(struct liftoff_output *output, int x, int y, uint32_t width, uint32_t height)
 {
 	uint32_t fb_id;
 	struct liftoff_layer *layer;
@@ -85,7 +85,7 @@ main(int argc, char *argv[])
 	for (i = 0; i < layers_len; i++) {
 		/* Planes don't intersect, so the library can arrange them in
 		 * any order. Testing all combinations takes more time. */
-		layers[i] = add_layer(output, i * 100, i * 100, 100, 100);
+		layers[i] = add_layer(output, (int)i * 100, (int)i * 100, 100, 100);
 		for (j = 0; j < planes_len; j++) {
 			if (j == 1) {
 				/* Make the lowest plane above the primary plane
