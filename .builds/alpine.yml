@@ -29,8 +29,6 @@ tasks:
       ninja -C build-clang/ test
   - coverage: |
       cd libliftoff
-      echo "exclude-directories = test/" >>gcovr.cfg
-      echo "exclude-directories = example/" >>gcovr.cfg
       ninja -C build-gcc/ coverage-html
       cd build-gcc/meson-logs/
       tar -czf ~/coveragereport.tar.gz coveragereport
