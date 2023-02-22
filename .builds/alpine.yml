@@ -15,18 +15,25 @@ tasks:
       cd libliftoff
       CC=gcc meson build-gcc/ --fatal-meson-warnings -Db_coverage=true
       CC=clang meson build-clang/ --fatal-meson-warnings -Db_sanitize=address,undefined -Db_lundef=false
+      meson build-x86/ --fatal-meson-warnings --buildtype=debugoptimized --cross-file=.builds/x86-linux-gnu.ini
   - build-gcc: |
       cd libliftoff
       ninja -C build-gcc/
   - build-clang: |
       cd libliftoff
       ninja -C build-clang/
+  - build-x86: |
+      cd libliftoff
+      ninja -C build-x86/
   - test-gcc: |
       cd libliftoff
       ninja -C build-gcc/ test
   - test-clang: |
       cd libliftoff
       ninja -C build-clang/ test
+  - test-x86: |
+      cd libliftoff
+      ninja -C build-x86/ test
   - coverage: |
       cd libliftoff
       ninja -C build-gcc/ coverage-html
