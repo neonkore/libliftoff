@@ -335,11 +335,11 @@ plane_check_layer_fb(struct liftoff_plane *plane, struct liftoff_layer *layer)
 		return false;
 	}
 
-	if (format_index < modifiers[modifier_index].offset ||
-	    format_index >= modifiers[modifier_index].offset + 64) {
+	if ((size_t)format_index < modifiers[modifier_index].offset ||
+	    (size_t)format_index >= modifiers[modifier_index].offset + 64) {
 		return false;
 	}
-	format_shift = (int)(format_index - modifiers[modifier_index].offset);
+	format_shift = format_index - (int)modifiers[modifier_index].offset;
 	return (modifiers[modifier_index].formats & ((uint64_t)1 << format_shift)) != 0;
 }
 

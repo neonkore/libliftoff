@@ -145,7 +145,7 @@ main(int argc, char *argv[])
 						 crtc->mode.vdisplay, false);
 		for (j = 1; j < LAYERS_PER_OUTPUT; j++) {
 			layers[layers_len++] = add_layer(drm_fd, output,
-							 100 * j, 100 * j,
+							 100 * (int)j, 100 * (int)j,
 							 256, 256, j % 2);
 		}
 	}
