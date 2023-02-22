@@ -20,7 +20,7 @@ is underway to integrate it with [wlroots].
 
 Depends on libdrm. Requires universal planes and atomic.
 
-    meson build/
+    meson setup build/
     ninja -C build/
 
 ## Usage
